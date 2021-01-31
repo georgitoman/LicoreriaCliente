@@ -1,0 +1,66 @@
+﻿@model IEnumerable<Licoreria.Models.Producto>
+
+@{
+    ViewData["Title"] = "MacroAlcoholismo";
+}
+
+<h1>MacroAlcoholismo</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Nombre)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Precio)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Imagen)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Litros)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Categoria)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Nombre)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Precio)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Imagen)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Litros)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Categoria)
+            </td>
+            <td>
+                <form method="post">
+                    <label>Cantidad</label>
+                    <select>
+                        @for (int i = 0; i <= item.Stock; i++)
+                        {
+                            <option>@i</option>
+                        }
+                    </select>
+                    <button type="submit" class="btn btn-info">Añadir a carrito</button>
+                </form>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
