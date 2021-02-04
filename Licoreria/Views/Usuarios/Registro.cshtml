@@ -1,4 +1,4 @@
-﻿@model Licoreria.Models.Usuario
+﻿@model Licoreria.ViewModels.RegisterViewModel
 
 @{
     ViewData["Title"] = "Registro";
@@ -8,12 +8,13 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Registro" asp-controller="Usuarios">
+        <form class="form-control" asp-action="Registro" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="UserName" class="control-label"></label>
                 <input asp-for="UserName" class="form-control" />
                 <span asp-validation-for="UserName" class="text-danger"></span>
+                <span class="text-danger">@ViewData["MENSAJE"]</span>
             </div>
             <div class="form-group">
                 <label asp-for="Nombre" class="control-label"></label>
@@ -26,11 +27,10 @@
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label class="control-label">Confirmar Contraseña</label>
-                <input name="confpassword" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
+                <label asp-for="ConfPassword" class="control-label"></label>
+                <input asp-for="ConfPassword" class="form-control" />
+                <span asp-validation-for="ConfPassword" class="text-danger"></span>
             </div>
-            @Html.Raw(ViewData["MENSAJE"])
             <div class="form-group">
                 <label asp-for="Correo" class="control-label"></label>
                 <input asp-for="Correo" class="form-control" />
@@ -47,4 +47,3 @@
         </form>
     </div>
 </div>
-

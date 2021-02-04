@@ -134,7 +134,7 @@ namespace Licoreria.Repositories
             }
         }
 
-        private bool UserNameExists(String username)
+        public bool UserNameExists(String username)
         {
             bool res = this.context.Usuarios.Where(z => z.UserName == username).Any();
             if(res)

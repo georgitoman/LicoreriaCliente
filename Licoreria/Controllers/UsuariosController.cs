@@ -1,5 +1,6 @@
 ﻿using Licoreria.Models;
 using Licoreria.Repositories;
+using Licoreria.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -48,19 +49,25 @@ namespace Licoreria.Controllers
         }
 
         [HttpPost]
-        public IActionResult Registro(String username, String nombre, String correo, String password, String confpassword, String telefono)
+        public IActionResult Registro(RegisterViewModel model)
         {
-            if(password == confpassword)
+            if (ModelState.IsValid)
             {
-                this.repo.InsertarUsuario(username, nombre, correo, password, telefono);
-                return RedirectToAction("LogIn", "Usuarios");
-            }
-            else
+                if (this.repo.UserNameExists(model.UserName))
+                {
+                    ViewData["MENSAJE"] = "Nombre de usuario ya esta en uso";
+                    return View();
+                } else
+                {
+                    this.repo.InsertarUsuario(model.UserName, model.Nombre, model.Correo, model.Password, model.Telefono);
+                    return RedirectToAction("LogIn", "Usuarios");
+                }
+
+            } else
             {
-                ViewData["MENSAJE"] = "<h4 style='color:red'>Contraseñas no coinciden</h4>";
                 return View();
             }
-            
+
         }
     }
 }
