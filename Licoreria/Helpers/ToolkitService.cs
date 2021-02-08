@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,6 +24,17 @@ namespace Licoreria.Helpers
                 }
             }
             return iguales;
+        }
+
+        public static String SerializeJsonObject(object objeto)
+        {
+            String respuesta = JsonConvert.SerializeObject(objeto);
+            return respuesta;
+        }
+
+        public static T DeserializeJsonObject<T>(String json)
+        {
+            return JsonConvert.DeserializeObject<T>(json);
         }
     }
 }

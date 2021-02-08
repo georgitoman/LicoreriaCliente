@@ -41,13 +41,8 @@
             </td>
             <td>
                 <form method="post">
-                    <label>Cantidad</label>
-                    <select>
-                        @for (int i = 0; i <= item.Stock; i++)
-                        {
-                            <option>@i</option>
-                        }
-                    </select>
+                    <input type="hidden" name="idproducto" value="@item.IdProducto" />
+                    <input type="number" name="cantidad" style="width:45px" value="1" min="1" max="100" />
                     <button type="submit" class="btn btn-info">Añadir a carrito</button>
                 </form>
             </td>

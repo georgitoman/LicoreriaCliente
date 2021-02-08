@@ -1,0 +1,35 @@
+﻿@model List<Producto>
+
+@{
+    List<int> cantidades = ViewData["CANTIDADES"] as List<int>;
+    decimal subtotal = 0;
+    int contador = 0;
+}
+
+<h1>Tramitar Pedido</h1>
+
+<div>
+    <hr />
+    <table class="table table-borderless">
+        @foreach (Producto prod in Model)
+        {
+            decimal preciototal = prod.Precio * cantidades[contador];
+            <tr>
+                <td>@prod.Nombre</td>
+                <td><b style="position:center">x @cantidades[contador]</b></td>
+                <td>@preciototal €</td>
+            </tr>
+            contador++;
+            subtotal += preciototal;
+        }
+        <tr>
+            <td></td>
+            <td></td>
+            <td><b>SUBTOTAL: @subtotal €</b></td>
+        </tr>
+    </table>
+</div>
+<div>
+    <a class="btn btn-info" asp-action="Carrito" asp-controller="Productos">Volver al carrito</a>
+    <a class="btn btn-success" asp-action="ConfirmarPedido" asp-controller="Pedidos" asp-route-subtotal="@subtotal">CONFIRMAR</a>
+</div>

@@ -23,7 +23,7 @@ namespace Licoreria.Repositories
 
         public List<Categoria> GetCategorias()
         {
-            return this.context.Categorias.Where(z => z.IdCategoria != 6).ToList();
+            return this.context.Categorias.ToList();
         }
 
         public List<Producto> GetProductos(int idcategoria)
@@ -51,6 +51,11 @@ namespace Licoreria.Repositories
             {
                 return productos;
             }
+        }
+
+        public Usuario BuscarUsuario(int idusuario)
+        {
+            return this.context.Usuarios.Where(z => z.IdUsuario == idusuario).FirstOrDefault();
         }
 
         public void InsertarUsuario(String username, String nombre, String correo, String password, String telefono)
@@ -109,6 +114,47 @@ namespace Licoreria.Repositories
                 return null;
             }
             
+        }
+
+        public List<Producto> GetListaProductos(List<int> idproductos)
+        {
+            return this.context.Productos.Where(z => idproductos.Contains(z.IdProducto)).ToList();
+        }
+
+        public void CreatePedido(int idusuario, decimal subtotal, Carrito carrito) {
+            Pedido pedido = new Pedido();
+            pedido.IdPedido = this.GetMaxId(Tablas.Pedidos);
+            pedido.Usuario = idusuario;
+            pedido.Fecha = DateTime.Now;
+            pedido.Coste = subtotal;
+            this.context.Pedidos.Add(pedido);
+            this.context.SaveChanges();
+
+            List<Producto> productos = this.GetListaProductos(carrito.Productos);
+
+            int contador = 0;
+            foreach(Producto prod in productos)
+            {
+                ProductosPedido pp = new ProductosPedido();
+                pp.IdProductosPedido = this.GetMaxId(Tablas.ProductosPedido);
+                pp.Pedido = pedido.IdPedido;
+                pp.Producto = prod.IdProducto;
+                pp.Cantidad = carrito.Cantidades[contador];
+
+                this.context.ProductosPedidos.Add(pp);
+                this.context.SaveChanges();
+                contador++;
+            }
+        }
+
+        public List<Pedido> GetPedidosUsuario(int idusuario)
+        {
+            return this.context.Pedidos.Where(z => z.Usuario == idusuario).ToList();
+        }
+
+        public List<ProductosPedido> GetProductosPedido(int idpedido)
+        {
+            return this.context.ProductosPedidos.Where(z => z.Pedido == idpedido).ToList();
         }
 
         private int GetMaxId(Tablas tabla)

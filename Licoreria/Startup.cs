@@ -34,6 +34,7 @@ namespace Licoreria
             services.AddDbContext<LicoreriaContext>(options =>
             options.UseSqlServer(conexion));
 
+            services.AddSession();
             services.AddControllersWithViews();
         }
 
@@ -47,12 +48,13 @@ namespace Licoreria
 
             app.UseRouting();
             app.UseStaticFiles();
+            app.UseSession();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}");
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
             });
         }
     }

@@ -6,9 +6,6 @@
 
 <h1>MacroAlcoholismo</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
 <table class="table">
     <thead>
         <tr>
@@ -46,15 +43,16 @@
                 @Html.DisplayFor(modelItem => item.Litros)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Categoria)
+                @ViewData["CATEGORIA"]
             </td>
             <td>
                 <form method="post">
+                    <input type="hidden" name="idproducto" value="@item.IdProducto" />
                     <label>Cantidad</label>
-                    <select>
+                    <select name="cantidades">
                         @for (int i = 0; i <= item.Stock; i++)
                         {
-                            <option>@i</option>
+                            <option name="cantidad" value="@i">@i</option>
                         }
                     </select>
                     <button type="submit" class="btn btn-info">Añadir a carrito</button>

@@ -1,0 +1,20 @@
+﻿@model List<Categoria>
+
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Categorias</a>
+    <div class="dropdown-menu" aria-labelledby="dropdown01">
+        @foreach (Categoria cat in Model)
+        {
+            <a class="dropdown-item" asp-controller="Productos"
+               asp-action="Index"
+               asp-route-idcategoria="@cat.IdCategoria">@cat.Nombre</a>
+        }
+
+    </div>
+</li>
+<li class="nav-item">
+    <a class="nav-link" asp-controller="Productos" asp-action="MicroAlcoholismo">MicroAlcoholismo</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" asp-controller="Productos" asp-action="MacroAlcoholismo">MacroAlcoholismo</a>
+</li>

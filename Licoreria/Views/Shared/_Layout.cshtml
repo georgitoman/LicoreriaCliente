@@ -29,33 +29,23 @@
                 <li class="nav-item active">
                     <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
                 </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Categorias</a>
-                    <div class="dropdown-menu" aria-labelledby="dropdown01">
-                         <a class="dropdown-item" asp-controller="Productos" asp-action="Index" asp-route-idcategoria="1">Ginebra</a>
-                         <a class="dropdown-item" asp-controller="Productos" asp-action="Index" asp-route-idcategoria="2">Ron</a>
-                         <a class="dropdown-item" asp-controller="Productos" asp-action="Index" asp-route-idcategoria="3">Tequila</a>
-                         <a class="dropdown-item" asp-controller="Productos" asp-action="Index" asp-route-idcategoria="4">Vodka</a>
-                         <a class="dropdown-item" asp-controller="Productos" asp-action="Index" asp-route-idcategoria="5">Whisky</a>
-                    </div>
+                @await Component.InvokeAsync("MenuCategorias") 
+            </ul>
+            <partial name="_PartialMenu" />
+            <ul class="navbar-nav my-2 my-lg-0">
+                <li class="nav-item">
+                    <a asp-controller="Productos" asp-action="Carrito">
+                        <img src="~/images/Carrito.png" style="width:50px; height:45px" />
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" asp-controller="Productos" asp-action="MicroAlcoholismo">MicroAlcoholismo</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-controller="Productos" asp-action="MacroAlcoholismo">MacroAlcoholismo</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-controller="Productos" asp-action="Index" asp-route-idcategoria="6">Extras</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-controller="Usuarios" asp-action="LogIn">Login</a>
+                    <form class="form-inline" method="post">
+                        <input class="form-control mr-sm-2" type="text" placeholder="Buscar" aria-label="Buscador">
+                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Buscar</button>
+                    </form>
                 </li>
             </ul>
-            <form class="form-inline my-2 my-lg-0" method="post">
-                <input class="form-control mr-sm-2" type="text" placeholder="Buscar" aria-label="Buscador">
-                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Buscar</button>
-            </form>
+            
         </div>
     </nav>
 

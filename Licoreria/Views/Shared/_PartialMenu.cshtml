@@ -1,0 +1,29 @@
+﻿@{
+    String usuario = Context.Session.GetString("USER");
+}
+
+@if (usuario == null)
+{
+    <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+            <a class="nav-link" asp-action="LogIn" asp-controller="Usuarios">
+                Login
+            </a>
+        </li>
+    </ul>
+}
+else
+{
+    <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+            <a class="nav-link text-info" asp-action="Perfil" asp-controller="Usuarios">
+                Perfil
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-danger" asp-action="LogOut" asp-controller="Usuarios">
+                Logout
+            </a>
+        </li>
+    </ul>
+}
