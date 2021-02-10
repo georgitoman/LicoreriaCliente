@@ -41,7 +41,7 @@ namespace Licoreria.Repositories
 
         public List<Producto> GetProductosMini()
         {
-            return this.context.Productos.Where(z => z.Litros <= 0.02M).ToList();
+            return this.context.Productos.Where(z => z.Litros <= 0.20M).ToList();
         }
 
         public List<Producto> GetProductosMaxi()
