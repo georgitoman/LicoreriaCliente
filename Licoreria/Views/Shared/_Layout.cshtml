@@ -9,12 +9,14 @@
     <title>Licorería</title>
 
     <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/starter-template/">
+    <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/album/">
 
     <!-- Bootstrap core CSS -->
     <link href="~/css/bootstrap.min.css" rel="stylesheet" />
 
     <!-- Custom styles for this template -->
     <link href="~/css/starter-template.css" rel="stylesheet" />
+    <link href="~/css/album.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -27,9 +29,9 @@
         <div class="collapse navbar-collapse" id="navbarsExampleDefault">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item active">
-                    <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                    <a class="nav-link" asp-action="Index" asp-controller="Home">Home <span class="sr-only">(current)</span></a>
                 </li>
-                @await Component.InvokeAsync("MenuCategorias") 
+                @await Component.InvokeAsync("MenuCategorias")
             </ul>
             <partial name="_PartialMenu" />
             <ul class="navbar-nav my-2 my-lg-0">
@@ -45,7 +47,7 @@
                     </form>
                 </li>
             </ul>
-            
+
         </div>
     </nav>
 

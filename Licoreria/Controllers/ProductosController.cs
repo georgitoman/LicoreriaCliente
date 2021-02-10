@@ -11,9 +11,9 @@ namespace Licoreria.Controllers
 {
     public class ProductosController : Controller
     {
-        RepositoryLicoreria repo;
+        IRepositoryLicoreria repo;
 
-        public ProductosController(RepositoryLicoreria repo)
+        public ProductosController(IRepositoryLicoreria repo)
         {
             this.repo = repo;
         }
@@ -21,6 +21,7 @@ namespace Licoreria.Controllers
         public IActionResult Index(int idcategoria)
         {
             List<Producto> productos = repo.GetProductos(idcategoria);
+            ViewData["NOMBRECAT"] = this.repo.GetNombreCategoria(idcategoria);
             TempData["CATEGORIA"] = idcategoria;
             return View(productos);
         }
@@ -50,8 +51,12 @@ namespace Licoreria.Controllers
                 sessioncar.Cantidades[i] += cantidad;
                 HttpContext.Session.SetObject("CARRITO", sessioncar);
             }
+
             int idcategoria = Convert.ToInt32(TempData["CATEGORIA"]);
-            List<Producto> productos = repo.GetProductos(idcategoria);
+            ViewData["NOMBRECAT"] = this.repo.GetNombreCategoria(idcategoria);
+            TempData["CATEGORIA"] = idcategoria;
+            List<Producto> productos = this.repo.GetProductos(idcategoria);
+
             return View(productos);
         }
 
@@ -64,21 +69,29 @@ namespace Licoreria.Controllers
         [HttpPost]
         public IActionResult MicroAlcoholismo(int idproducto, int cantidad)
         {
-            List<int> sessionprod;
-            if (HttpContext.Session.GetObject<List<int>>("CARRITO") == null)
+            Carrito sessioncar;
+            if (HttpContext.Session.GetObject<Carrito>("CARRITO") == null)
             {
-                sessionprod = new List<int>();
+                sessioncar = new Carrito();
+                sessioncar.Productos = new List<int>();
+                sessioncar.Cantidades = new List<int>();
             }
             else
             {
-                sessionprod = HttpContext.Session.GetObject<List<int>>("CARRITO");
+                sessioncar = HttpContext.Session.GetObject<Carrito>("CARRITO");
             }
-            if (sessionprod.Contains(idproducto) == false)
+            if (sessioncar.Productos.Contains(idproducto) == false)
             {
-                sessionprod.Add(idproducto);
-                HttpContext.Session.SetObject("CARRITO", sessionprod);
+                sessioncar.Productos.Add(idproducto);
+                sessioncar.Cantidades.Add(cantidad);
+                HttpContext.Session.SetObject("CARRITO", sessioncar);
             }
-            int idcategoria = Convert.ToInt32(TempData["CATEGORIA"]);
+            else
+            {
+                int i = sessioncar.Productos.IndexOf(idproducto);
+                sessioncar.Cantidades[i] += cantidad;
+                HttpContext.Session.SetObject("CARRITO", sessioncar);
+            }
             List<Producto> productos = repo.GetProductosMini();
             return View(productos);
         }
@@ -92,21 +105,29 @@ namespace Licoreria.Controllers
         [HttpPost]
         public IActionResult MacroAlcoholismo(int idproducto, int cantidad)
         {
-            List<int> sessionprod;
-            if (HttpContext.Session.GetObject<List<int>>("CARRITO") == null)
+            Carrito sessioncar;
+            if (HttpContext.Session.GetObject<Carrito>("CARRITO") == null)
             {
-                sessionprod = new List<int>();
+                sessioncar = new Carrito();
+                sessioncar.Productos = new List<int>();
+                sessioncar.Cantidades = new List<int>();
             }
             else
             {
-                sessionprod = HttpContext.Session.GetObject<List<int>>("CARRITO");
+                sessioncar = HttpContext.Session.GetObject<Carrito>("CARRITO");
             }
-            if (sessionprod.Contains(idproducto) == false)
+            if (sessioncar.Productos.Contains(idproducto) == false)
             {
-                sessionprod.Add(idproducto);
-                HttpContext.Session.SetObject("CARRITO", sessionprod);
+                sessioncar.Productos.Add(idproducto);
+                sessioncar.Cantidades.Add(cantidad);
+                HttpContext.Session.SetObject("CARRITO", sessioncar);
             }
-            int idcategoria = Convert.ToInt32(TempData["CATEGORIA"]);
+            else
+            {
+                int i = sessioncar.Productos.IndexOf(idproducto);
+                sessioncar.Cantidades[i] += cantidad;
+                HttpContext.Session.SetObject("CARRITO", sessioncar);
+            }
             List<Producto> productos = repo.GetProductosMaxi();
             return View(productos);
         }
@@ -114,7 +135,12 @@ namespace Licoreria.Controllers
         public IActionResult Carrito(int? pos, int? cantidad)
         {
             Carrito sessioncar = HttpContext.Session.GetObject<Carrito>("CARRITO");
-            if (sessioncar.Productos.Count == 0)
+            if(sessioncar == null)
+            {
+                ViewData["MENSAJE"] = "CARRITO VACÍO";
+                return View();
+            }
+            else if (sessioncar.Productos.Count == 0)
             {
                 ViewData["MENSAJE"] = "CARRITO VACÍO";
                 return View();

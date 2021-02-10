@@ -29,7 +29,7 @@ namespace Licoreria
         {
             String conexion = this.Configuration.GetConnectionString("sqllicoreria");
 
-            services.AddTransient<RepositoryLicoreria>();
+            services.AddTransient<IRepositoryLicoreria, RepositoryLicoreria>();
 
             services.AddDbContext<LicoreriaContext>(options =>
             options.UseSqlServer(conexion));

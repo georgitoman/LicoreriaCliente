@@ -8,11 +8,7 @@ using System.Threading.Tasks;
 
 namespace Licoreria.Repositories
 {
-    public enum Tablas
-    {
-        Usuarios = 0, Productos = 1, Categorias = 2, Pedidos = 3, ProductosPedido = 4
-    }
-    public class RepositoryLicoreria
+    public class RepositoryLicoreria: IRepositoryLicoreria
     {
         LicoreriaContext context;
 
@@ -21,10 +17,22 @@ namespace Licoreria.Repositories
             this.context = context;
         }
 
+        #region CATEGORIAS
+
         public List<Categoria> GetCategorias()
         {
             return this.context.Categorias.ToList();
         }
+
+        public String GetNombreCategoria(int idcategoria)
+        {
+            Categoria cat = this.context.Categorias.Where(z => z.IdCategoria == idcategoria).FirstOrDefault();
+            return cat.Nombre;
+        }
+
+        #endregion
+
+        #region PRODUCTOS
 
         public List<Producto> GetProductos(int idcategoria)
         {
@@ -52,6 +60,21 @@ namespace Licoreria.Repositories
                 return productos;
             }
         }
+
+        public List<Producto> GetListaProductos(List<int> idproductos)
+        {
+            List<Producto> productos = new List<Producto>();
+            foreach(int id in idproductos)
+            {
+                Producto prod = this.context.Productos.Where(z => z.IdProducto == id).FirstOrDefault();
+                productos.Add(prod);
+            }
+            return productos;
+        }
+
+        #endregion
+
+        #region USUARIOS
 
         public Usuario BuscarUsuario(int idusuario)
         {
@@ -116,10 +139,22 @@ namespace Licoreria.Repositories
             
         }
 
-        public List<Producto> GetListaProductos(List<int> idproductos)
+        public bool UserNameExists(String username)
         {
-            return this.context.Productos.Where(z => idproductos.Contains(z.IdProducto)).ToList();
+            bool res = this.context.Usuarios.Where(z => z.UserName == username).Any();
+            if (res)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
+
+        #endregion
+
+        #region PEDIDOS
 
         public void CreatePedido(int idusuario, decimal subtotal, Carrito carrito) {
             Pedido pedido = new Pedido();
@@ -157,7 +192,11 @@ namespace Licoreria.Repositories
             return this.context.ProductosPedidos.Where(z => z.Pedido == idpedido).ToList();
         }
 
-        private int GetMaxId(Tablas tabla)
+        #endregion
+
+        #region MISC
+
+        public int GetMaxId(Tablas tabla)
         {
             if(tabla == Tablas.Usuarios)
             {
@@ -180,16 +219,7 @@ namespace Licoreria.Repositories
             }
         }
 
-        public bool UserNameExists(String username)
-        {
-            bool res = this.context.Usuarios.Where(z => z.UserName == username).Any();
-            if(res)
-            {
-                return true;
-            } else
-            {
-                return false;
-            }
-        }
+        #endregion
+
     }
 }

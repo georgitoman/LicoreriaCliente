@@ -12,9 +12,9 @@ namespace Licoreria.Controllers
 {
     public class UsuariosController : Controller
     {
-        RepositoryLicoreria repo;
+        IRepositoryLicoreria repo;
 
-        public UsuariosController(RepositoryLicoreria repo)
+        public UsuariosController(IRepositoryLicoreria repo)
         {
             this.repo = repo;
         }

@@ -10,9 +10,9 @@ namespace Licoreria.ViewComponents
 {
     public class MenuCategoriasViewComponent: ViewComponent
     {
-        RepositoryLicoreria repo;
+        IRepositoryLicoreria repo;
 
-        public MenuCategoriasViewComponent(RepositoryLicoreria repo)
+        public MenuCategoriasViewComponent(IRepositoryLicoreria repo)
         {
             this.repo = repo;
         }

@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace Licoreria.Helpers
 {
+    public enum Tablas
+    {
+        Usuarios = 0, Productos = 1, Categorias = 2, Pedidos = 3, ProductosPedido = 4
+    }
+
     public static class ToolkitService
     {
         public static bool CompararArrayBytes(byte[] a, byte[] b)
@@ -36,5 +41,7 @@ namespace Licoreria.Helpers
         {
             return JsonConvert.DeserializeObject<T>(json);
         }
+
+
     }
 }
