@@ -44,6 +44,7 @@ namespace Licoreria.Controllers
             int usuario = Convert.ToInt32(this.HttpContext.Session.GetString("USER"));
             Carrito carrito = HttpContext.Session.GetObject<Carrito>("CARRITO");
             this.repo.CreatePedido(usuario, subtotal, carrito);
+            HttpContext.Session.Remove("CARRITO");
             return RedirectToAction("Pedidos", "Usuarios");
         }
     }

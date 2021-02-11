@@ -18,7 +18,7 @@ namespace Licoreria.Controllers
             this.repo = repo;
         }
 
-        public IActionResult Index(int idcategoria)
+        public IActionResult ProductosCategoria(int idcategoria)
         {
             List<Producto> productos = repo.GetProductos(idcategoria);
             ViewData["NOMBRECAT"] = this.repo.GetNombreCategoria(idcategoria);
@@ -27,7 +27,7 @@ namespace Licoreria.Controllers
         }
 
         [HttpPost]
-        public IActionResult Index(int idproducto, int cantidad)
+        public IActionResult ProductosCategoria(int idproducto, int cantidad)
         {
             Carrito sessioncar;
             if (HttpContext.Session.GetObject<Carrito>("CARRITO") == null)
@@ -40,15 +40,88 @@ namespace Licoreria.Controllers
             {
                 sessioncar = HttpContext.Session.GetObject<Carrito>("CARRITO");
             }
+
+            int stock = this.repo.GetStock(idproducto);
             if (sessioncar.Productos.Contains(idproducto) == false)
             {
+                if (stock < cantidad)
+                {
+                    cantidad = stock;
+                    TempData["ALERTA"] = "No hay suficiente stock. Se han metido " + cantidad + " productos a su carrito.";
+                }
                 sessioncar.Productos.Add(idproducto);
                 sessioncar.Cantidades.Add(cantidad);
                 HttpContext.Session.SetObject("CARRITO", sessioncar);
             } else
             {
                 int i = sessioncar.Productos.IndexOf(idproducto);
-                sessioncar.Cantidades[i] += cantidad;
+                int cantidadtotal = cantidad + sessioncar.Cantidades[i];
+                if(stock < cantidadtotal)
+                {
+                    if(sessioncar.Cantidades[i] == stock)
+                        TempData["ALERTA"] = "No hay suficiente stock.";
+                    else
+                        TempData["ALERTA"] = "No hay suficiente stock. Se han metido " + (stock - sessioncar.Cantidades[i]) + " productos extras a su carrito.";
+                    cantidadtotal = stock;
+                }
+                sessioncar.Cantidades[i] = cantidadtotal;
+                HttpContext.Session.SetObject("CARRITO", sessioncar);
+            }
+
+            int idcategoria = Convert.ToInt32(TempData["CATEGORIA"]);
+            ViewData["NOMBRECAT"] = this.repo.GetNombreCategoria(idcategoria);
+            TempData["CATEGORIA"] = idcategoria;
+            List<Producto> productos = this.repo.GetProductos(idcategoria);
+
+            return View(productos);
+        }
+
+        public IActionResult TodosProductos()
+        {
+            List<Producto> productos = repo.GetProductos();
+            return View(productos);
+        }
+
+        [HttpPost]
+        public IActionResult TodosProductos(int idproducto, int cantidad)
+        {
+            Carrito sessioncar;
+            if (HttpContext.Session.GetObject<Carrito>("CARRITO") == null)
+            {
+                sessioncar = new Carrito();
+                sessioncar.Productos = new List<int>();
+                sessioncar.Cantidades = new List<int>();
+            }
+            else
+            {
+                sessioncar = HttpContext.Session.GetObject<Carrito>("CARRITO");
+            }
+
+            int stock = this.repo.GetStock(idproducto);
+            if (sessioncar.Productos.Contains(idproducto) == false)
+            {
+                if (stock < cantidad)
+                {
+                    cantidad = stock;
+                    TempData["ALERTA"] = "No hay suficiente stock. Se han metido " + cantidad + " productos a su carrito.";
+                }
+                sessioncar.Productos.Add(idproducto);
+                sessioncar.Cantidades.Add(cantidad);
+                HttpContext.Session.SetObject("CARRITO", sessioncar);
+            }
+            else
+            {
+                int i = sessioncar.Productos.IndexOf(idproducto);
+                int cantidadtotal = cantidad + sessioncar.Cantidades[i];
+                if (stock < cantidadtotal)
+                {
+                    if (sessioncar.Cantidades[i] == stock)
+                        TempData["ALERTA"] = "No hay suficiente stock.";
+                    else
+                        TempData["ALERTA"] = "No hay suficiente stock. Se han metido " + (stock - sessioncar.Cantidades[i]) + " productos extras a su carrito.";
+                    cantidadtotal = stock;
+                }
+                sessioncar.Cantidades[i] = cantidadtotal;
                 HttpContext.Session.SetObject("CARRITO", sessioncar);
             }
 
@@ -80,8 +153,15 @@ namespace Licoreria.Controllers
             {
                 sessioncar = HttpContext.Session.GetObject<Carrito>("CARRITO");
             }
+
+            int stock = this.repo.GetStock(idproducto);
             if (sessioncar.Productos.Contains(idproducto) == false)
             {
+                if (stock < cantidad)
+                {
+                    cantidad = stock;
+                    TempData["ALERTA"] = "No hay suficiente stock. Se han metido " + cantidad + " productos a su carrito.";
+                }
                 sessioncar.Productos.Add(idproducto);
                 sessioncar.Cantidades.Add(cantidad);
                 HttpContext.Session.SetObject("CARRITO", sessioncar);
@@ -89,7 +169,16 @@ namespace Licoreria.Controllers
             else
             {
                 int i = sessioncar.Productos.IndexOf(idproducto);
-                sessioncar.Cantidades[i] += cantidad;
+                int cantidadtotal = cantidad + sessioncar.Cantidades[i];
+                if (stock < cantidadtotal)
+                {
+                    if (sessioncar.Cantidades[i] == stock)
+                        TempData["ALERTA"] = "No hay suficiente stock.";
+                    else
+                        TempData["ALERTA"] = "No hay suficiente stock. Se han metido " + (stock - sessioncar.Cantidades[i]) + " productos extras a su carrito.";
+                    cantidadtotal = stock;
+                }
+                sessioncar.Cantidades[i] = cantidadtotal;
                 HttpContext.Session.SetObject("CARRITO", sessioncar);
             }
             List<Producto> productos = repo.GetProductosMini();
@@ -116,8 +205,15 @@ namespace Licoreria.Controllers
             {
                 sessioncar = HttpContext.Session.GetObject<Carrito>("CARRITO");
             }
+
+            int stock = this.repo.GetStock(idproducto);
             if (sessioncar.Productos.Contains(idproducto) == false)
             {
+                if (stock < cantidad)
+                {
+                    cantidad = stock;
+                    TempData["ALERTA"] = "No hay suficiente stock. Se han metido " + cantidad + " productos a su carrito.";
+                }
                 sessioncar.Productos.Add(idproducto);
                 sessioncar.Cantidades.Add(cantidad);
                 HttpContext.Session.SetObject("CARRITO", sessioncar);
@@ -125,7 +221,16 @@ namespace Licoreria.Controllers
             else
             {
                 int i = sessioncar.Productos.IndexOf(idproducto);
-                sessioncar.Cantidades[i] += cantidad;
+                int cantidadtotal = cantidad + sessioncar.Cantidades[i];
+                if (stock < cantidadtotal)
+                {
+                    if (sessioncar.Cantidades[i] == stock)
+                        TempData["ALERTA"] = "No hay suficiente stock.";
+                    else
+                        TempData["ALERTA"] = "No hay suficiente stock. Se han metido " + (stock - sessioncar.Cantidades[i]) + " productos extras a su carrito.";
+                    cantidadtotal = stock;
+                }
+                sessioncar.Cantidades[i] = cantidadtotal;
                 HttpContext.Session.SetObject("CARRITO", sessioncar);
             }
             List<Producto> productos = repo.GetProductosMaxi();

@@ -4,6 +4,16 @@
     ViewData["Title"] = "MacroAlcoholismo";
 }
 
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            var mensaje = '@TempData["ALERTA"]';
+            if (mensaje)
+                alert(mensaje);
+        });
+    </script>
+}
+
 <h1>MacroAlcoholismo</h1>
 <div class="album py-5 bg-light">
     <div class="container">
@@ -15,18 +25,38 @@
                         <div class="embed-responsive embed-responsive-4by3">
                             <img class="card-img embed-responsive-item" src="~/images/@item.Imagen" alt="Imagen no disponible" style="object-fit:contain" />
                         </div>
-
                         <div class="card-body">
-                            <p class="card-text">@item.Nombre @item.Litros L</p>
+                            @if (item.Stock == 0)
+                            {
+                                <small class="card-subtitle text-danger">Producto agotado</small>
+                                <p class="card-title">@item.Nombre @item.Litros L</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <button type="button" disabled class="btn btn-outline-danger">No disponible</button>
+                                    <p class="card-text">@item.Precio €</p>
+                                </div>
+                            }
+                            else
+                            {
+                                if (item.Stock < 10)
+                                {
+                                    <small class="card-subtitle text-warning">¡¡Ultimas @item.Stock unidades!!</small>
+                                }
+                                else
+                                {
+                                    <small class="card-subtitle text-success">Producto disponible</small>
+                                }
+                                <p class="card-title">@item.Nombre @item.Litros L</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <form method="post">
+                                        <input type="hidden" name="idproducto" value="@item.IdProducto" />
+                                        <input type="number" name="cantidad" style="width:45px" value="1" min="1" max="50" />
+                                        <button type="submit" class="btn btn-info">Añadir a carrito</button>
+                                    </form>
+                                    <p class="card-text">@item.Precio €</p>
+                                </div>
 
-                            <div class="d-flex justify-content-between align-items-center">
-                                <form method="post">
-                                    <input type="hidden" name="idproducto" value="@item.IdProducto" />
-                                    <input type="number" name="cantidad" style="width:45px" value="1" min="1" max="100" />
-                                    <button type="submit" class="btn btn-info">Añadir a carrito</button>
-                                </form>
-                                <p class="card-text">@item.Precio €</p>
-                            </div>
+                            }
+
                         </div>
                     </div>
                 </div>

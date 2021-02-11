@@ -34,6 +34,11 @@ namespace Licoreria.Repositories
 
         #region PRODUCTOS
 
+        public List<Producto> GetProductos()
+        {
+            return this.context.Productos.ToList();
+        }
+
         public List<Producto> GetProductos(int idcategoria)
         {
             return this.context.Productos.Where(z => z.Categoria == idcategoria).ToList();
@@ -49,7 +54,7 @@ namespace Licoreria.Repositories
             return this.context.Productos.Where(z => z.Litros >= 1.50M).ToList();
         }
 
-        public List<Producto> BuscarProductos(String nombre)
+        public List<Producto> BuscarProductosNombre(String nombre)
         {
             List<Producto> productos = this.context.Productos.Where(z => z.Nombre.ToUpper().Contains(nombre.ToUpper())).ToList();
             if(productos.Count == 0)
@@ -61,6 +66,11 @@ namespace Licoreria.Repositories
             }
         }
 
+        public Producto BuscarProducto(int idproducto)
+        {
+            return this.context.Productos.Where(z => z.IdProducto == idproducto).FirstOrDefault();
+        }
+
         public List<Producto> GetListaProductos(List<int> idproductos)
         {
             List<Producto> productos = new List<Producto>();
@@ -70,6 +80,19 @@ namespace Licoreria.Repositories
                 productos.Add(prod);
             }
             return productos;
+        }
+
+        public int GetStock(int idproducto) {
+            Producto prod = this.BuscarProducto(idproducto);
+
+            return prod.Stock;
+        }
+
+        public void ModificarStock(int idproducto, int cantidad)
+        {
+            Producto prod = this.context.Productos.Where(z => z.IdProducto == idproducto).FirstOrDefault();
+            prod.Stock = prod.Stock - cantidad;
+            this.context.SaveChanges();
         }
 
         #endregion
@@ -176,6 +199,8 @@ namespace Licoreria.Repositories
                 pp.Producto = prod.IdProducto;
                 pp.Cantidad = carrito.Cantidades[contador];
 
+                this.ModificarStock(prod.IdProducto, carrito.Cantidades[contador]);
+
                 this.context.ProductosPedidos.Add(pp);
                 this.context.SaveChanges();
                 contador++;
@@ -200,19 +225,54 @@ namespace Licoreria.Repositories
         {
             if(tabla == Tablas.Usuarios)
             {
-                return this.context.Usuarios.Max(z => z.IdUsuario) + 1;
+                if(this.context.Usuarios.Count() != 0)
+                {
+                    return this.context.Usuarios.Max(z => z.IdUsuario) + 1;
+                } else
+                {
+                    return 1;
+                }
+                
             } else if(tabla == Tablas.Productos)
             {
-                return this.context.Productos.Max(z => z.IdProducto) + 1;
+                if (this.context.Productos.Count() != 0)
+                {
+                    return this.context.Productos.Max(z => z.IdProducto) + 1;
+                }
+                else
+                {
+                    return 1;
+                }
             } else if(tabla == Tablas.Pedidos)
             {
-                return this.context.Pedidos.Max(z => z.IdPedido) + 1;
+                if (this.context.Pedidos.Count() != 0)
+                {
+                    return this.context.Pedidos.Max(z => z.IdPedido) + 1;
+                }
+                else
+                {
+                    return 1;
+                }
             } else if(tabla == Tablas.Categorias)
             {
-                return this.context.Categorias.Max(z => z.IdCategoria) + 1;
+                if (this.context.Categorias.Count() != 0)
+                {
+                    return this.context.Categorias.Max(z => z.IdCategoria) + 1;
+                }
+                else
+                {
+                    return 1;
+                }
             } else if(tabla == Tablas.ProductosPedido)
             {
-                return this.context.ProductosPedidos.Max(z => z.IdProductosPedido) + 1;
+                if (this.context.ProductosPedidos.Count() != 0)
+                {
+                    return this.context.ProductosPedidos.Max(z => z.IdProductosPedido) + 1;
+                }
+                else
+                {
+                    return 1;
+                }
             } else
             {
                 return -1;

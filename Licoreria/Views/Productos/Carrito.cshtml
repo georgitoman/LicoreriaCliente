@@ -47,7 +47,7 @@
             <td>
                 <form method="post">
                     <input type="hidden" name="pos" value="@contador" />
-                    <input type="number" name="cantidad" style="width:45px" value="@cantidades[contador]" min="0" max="100" />
+                    <input type="number" name="cantidad" style="width:45px" value="@cantidades[contador]" min="0" max="@item.Stock" />
                     <button type="submit" class="btn-sm btn-outline-primary">
                         Modificar
                     </button>
