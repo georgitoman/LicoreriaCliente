@@ -31,6 +31,12 @@ namespace Licoreria.Helpers
             return iguales;
         }
 
+        public static String NormalizeName(String extension, String nombre, String litros)
+        {
+            String lit = litros.Replace(".", "");
+            return nombre + " " + lit + extension;
+        }
+
         public static String SerializeJsonObject(object objeto)
         {
             String respuesta = JsonConvert.SerializeObject(objeto);

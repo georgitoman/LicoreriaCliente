@@ -37,7 +37,7 @@ namespace Licoreria.Controllers
             if(user != null)
             {
                 this.HttpContext.Session.SetString("USER", user.IdUsuario.ToString());
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("TodosProductos", "Productos");
             } else
             {
                 ViewData["MENSAJE"] = "<p style='color:red'>Usuario o contraseña incorrectos</p>";
@@ -48,7 +48,7 @@ namespace Licoreria.Controllers
         public IActionResult LogOut()
         {
             this.HttpContext.Session.Remove("USER");
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("TodosProductos", "Productos");
         }
 
         public IActionResult Perfil()
@@ -82,18 +82,6 @@ namespace Licoreria.Controllers
             {
                 return View();
             }
-        }
-
-        public IActionResult Pedidos()
-        {
-            int usuario = Convert.ToInt32(HttpContext.Session.GetString("USER"));
-            List<Pedido> pedidos = this.repo.GetPedidosUsuario(usuario);
-            return View(pedidos);
-        }
-
-        public IActionResult DetallesPedido(int idpedido)
-        {
-            return View();
         }
     }
 }

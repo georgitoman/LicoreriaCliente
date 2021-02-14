@@ -17,7 +17,9 @@ namespace Licoreria.Repositories
             String nombre, decimal? preciomax,
             decimal? litros, bool? stock, int? idcategoria);
 
-        List<Producto> BuscarProductosNombre(String nombre);
+        void InsertarProducto(String nombre, decimal precio, int stock, String imagen, decimal litros, int idcategoria);
+
+        void EditarProducto(int idproducto, String nombre, decimal precio, int stock, String imagen, decimal litros, int idcategoria);
 
         Producto BuscarProducto(int idproducto);
 
@@ -29,6 +31,10 @@ namespace Licoreria.Repositories
 
         List<decimal> GetListaLitros();
 
+        void RestarStock(int idproducto, int cantidad);
+
+        void SumarStock(int idproducto, int cantidad);
+
         Usuario BuscarUsuario(int idusuario);
 
         void InsertarUsuario(String username, String nombre, String correo, String password, String telefono);
@@ -39,9 +45,13 @@ namespace Licoreria.Repositories
 
         void CreatePedido(int idusuario, decimal subtotal, Carrito carrito);
 
+        Pedido BuscarPedido(int idpedido);
+
+        void CancelarPedido(int idpedido);
+
         List<Pedido> GetPedidosUsuario(int idusuario);
 
-        List<ProductosPedido> GetProductosPedido(int idpedido);
+        List<Producto> GetProductosPedido(int idpedido, ref List<int> cantidades);
 
         int GetMaxId(Tablas tabla);
 

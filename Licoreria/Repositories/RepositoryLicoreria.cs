@@ -131,16 +131,35 @@ namespace Licoreria.Repositories
             return productos;
         }
 
-        public List<Producto> BuscarProductosNombre(String nombre)
+        public void InsertarProducto(String nombre, decimal precio, int stock,
+            String imagen, decimal litros, int idcategoria)
         {
-            List<Producto> productos = this.context.Productos.Where(z => z.Nombre.ToUpper().Contains(nombre.ToUpper())).ToList();
-            if(productos.Count == 0)
-            {
-                return null;
-            } else
-            {
-                return productos;
-            }
+            Producto prod = new Producto();
+            prod.IdProducto = this.GetMaxId(Tablas.Productos);
+            prod.Nombre = nombre;
+            prod.Precio = precio;
+            prod.Stock = stock;
+            prod.Imagen = imagen;
+            prod.Litros = litros;
+            prod.Categoria = idcategoria;
+
+            this.context.Productos.Add(prod);
+            this.context.SaveChanges();
+        }
+
+        public void EditarProducto(int idproducto, String nombre, decimal precio,
+            int stock, String imagen, decimal litros, int idcategoria)
+        {
+            Producto prod = this.BuscarProducto(idproducto);
+            prod.Nombre = nombre;
+            prod.Precio = precio;
+            prod.Stock = stock;
+            prod.Imagen = imagen;
+            prod.Litros = litros;
+            prod.Categoria = idcategoria;
+
+            this.context.Productos.Add(prod);
+            this.context.SaveChanges();
         }
 
         public Producto BuscarProducto(int idproducto)
@@ -188,10 +207,17 @@ namespace Licoreria.Repositories
             return prod.Stock;
         }
 
-        public void ModificarStock(int idproducto, int cantidad)
+        public void RestarStock(int idproducto, int cantidad)
         {
             Producto prod = this.context.Productos.Where(z => z.IdProducto == idproducto).FirstOrDefault();
-            prod.Stock = prod.Stock - cantidad;
+            prod.Stock -= cantidad;
+            this.context.SaveChanges();
+        }
+
+        public void SumarStock(int idproducto, int cantidad)
+        {
+            Producto prod = this.context.Productos.Where(z => z.IdProducto == idproducto).FirstOrDefault();
+            prod.Stock += cantidad;
             this.context.SaveChanges();
         }
 
@@ -299,7 +325,7 @@ namespace Licoreria.Repositories
                 pp.Producto = prod.IdProducto;
                 pp.Cantidad = carrito.Cantidades[contador];
 
-                this.ModificarStock(prod.IdProducto, carrito.Cantidades[contador]);
+                this.RestarStock(prod.IdProducto, carrito.Cantidades[contador]);
 
                 this.context.ProductosPedidos.Add(pp);
                 this.context.SaveChanges();
@@ -307,14 +333,55 @@ namespace Licoreria.Repositories
             }
         }
 
+        public Pedido BuscarPedido(int idpedido)
+        {
+            return this.context.Pedidos.Where(z => z.IdPedido == idpedido).FirstOrDefault();
+        }
+
+        public void CancelarPedido(int idpedido)
+        {
+            List<int> cantidades = new List<int>();
+            List<Producto> productos = this.GetProductosPedido(idpedido, ref cantidades);
+            int cont = 0;
+
+            foreach(Producto aux in productos)
+            {
+                Producto prod = this.BuscarProducto(aux.IdProducto);
+                prod.Stock += cantidades[cont];
+                cont++;
+            }
+
+            Pedido ped = this.BuscarPedido(idpedido);
+            this.context.Pedidos.Remove(ped);
+
+            List<ProductosPedido> productosped = this.context.ProductosPedidos.Where(z => z.Pedido == idpedido).ToList();
+
+            foreach(ProductosPedido pp in productosped)
+            {
+                this.context.ProductosPedidos.Remove(pp);
+            }
+
+            this.context.SaveChanges();
+        }
+
         public List<Pedido> GetPedidosUsuario(int idusuario)
         {
             return this.context.Pedidos.Where(z => z.Usuario == idusuario).ToList();
         }
 
-        public List<ProductosPedido> GetProductosPedido(int idpedido)
+        public List<Producto> GetProductosPedido(int idpedido, ref List<int> cantidades)
         {
-            return this.context.ProductosPedidos.Where(z => z.Pedido == idpedido).ToList();
+            List<ProductosPedido> productosped = this.context.ProductosPedidos.Where(z => z.Pedido == idpedido).ToList();
+            List<Producto> productos = new List<Producto>();
+
+            foreach(ProductosPedido pp in productosped)
+            {
+                Producto prod = this.BuscarProducto(pp.Producto);
+                productos.Add(prod);
+                cantidades.Add(pp.Cantidad);
+            }
+
+            return productos;
         }
 
         #endregion

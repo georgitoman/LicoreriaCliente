@@ -1,0 +1,66 @@
+﻿@model IEnumerable<Licoreria.Models.Pedido>
+
+@{
+    ViewData["Title"] = "PedidosUsuario";
+}
+
+@section scripts { 
+    <script>
+        function Cancelar(id) {
+            var cancel = confirm("Cancelar pedido?");
+            if (cancel) {
+                $.ajax({
+                    url: "/Pedidos/Cancelar",
+                    data: { idpedido: id },
+                    type: "POST",
+                    success: function () {
+                        alert("Pedido cancelado con exito");
+                        location.reload();
+                    }
+                });
+            }
+        }
+    </script>
+}
+
+<h1>Pedidos</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Fecha)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Coste)
+            </th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Fecha)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Coste)
+                </td>
+                <td>
+                    @Html.ActionLink("Detalles", "ProductosPedido", new { idpedido = item.IdPedido })
+                </td>
+                <td>
+                    @if (item.Fecha.AddHours(1) > DateTime.Now)
+                    {
+                        <button type="button" id="btncancelar" class="btn btn-outline-danger" onclick="Cancelar(@item.IdPedido)">
+                            Cancelar
+                        </button>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+

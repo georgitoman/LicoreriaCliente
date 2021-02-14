@@ -1,4 +1,5 @@
 using Licoreria.Data;
+using Licoreria.Helpers;
 using Licoreria.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -30,6 +31,8 @@ namespace Licoreria
             String conexion = this.Configuration.GetConnectionString("sqllicoreria");
 
             services.AddTransient<IRepositoryLicoreria, RepositoryLicoreria>();
+            services.AddSingleton<PathProvider>();
+            services.AddSingleton<UploadService>();
 
             services.AddDbContext<LicoreriaContext>(options =>
             options.UseSqlServer(conexion));

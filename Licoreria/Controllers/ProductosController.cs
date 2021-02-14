@@ -1,9 +1,12 @@
 ﻿using Licoreria.Extensions;
+using Licoreria.Helpers;
 using Licoreria.Models;
 using Licoreria.Repositories;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -12,10 +15,12 @@ namespace Licoreria.Controllers
     public class ProductosController : Controller
     {
         IRepositoryLicoreria repo;
+        UploadService UploadService;
 
-        public ProductosController(IRepositoryLicoreria repo)
+        public ProductosController(IRepositoryLicoreria repo, UploadService us)
         {
             this.repo = repo;
+            this.UploadService = us;
         }
 
         public IActionResult TodosProductos(int? posicion, String nombre,
@@ -214,5 +219,48 @@ namespace Licoreria.Controllers
 
             return RedirectToAction("Carrito", "Productos");
         }
+
+        #region ADMIN
+
+        public IActionResult GestionIndex()
+        {
+            return View();
+        }
+
+        public IActionResult InsertarProducto()
+        {
+            ViewData["CATEGORIAS"] = this.repo.GetCategorias();
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> InsertarProducto(String nombre, decimal precio, int stock, IFormFile imagen, decimal litros, int idcategoria)
+        {
+            String filename = null;
+            if(imagen != null)
+            {
+                FileInfo fi = new FileInfo(imagen.FileName);
+                String extension = fi.Extension;
+                filename = ToolkitService.NormalizeName(extension, nombre, litros.ToString());
+                await this.UploadService.UploadFileAsync(imagen, Folders.Images, filename);
+            }
+
+            this.repo.InsertarProducto(nombre, precio, stock, filename, litros, idcategoria);
+            return RedirectToAction("GestionIndex", "Productos");
+        }
+
+        public IActionResult EditarProducto()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult EditarProducto(String nombre, decimal precio, int stock, String imagen, decimal litros, int idcategoria)
+        {
+            return View();
+        }
+
+        #endregion
+        
     }
 }

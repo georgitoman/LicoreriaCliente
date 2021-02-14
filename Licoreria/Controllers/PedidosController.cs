@@ -45,7 +45,34 @@ namespace Licoreria.Controllers
             Carrito carrito = HttpContext.Session.GetObject<Carrito>("CARRITO");
             this.repo.CreatePedido(usuario, subtotal, carrito);
             HttpContext.Session.Remove("CARRITO");
-            return RedirectToAction("Pedidos", "Usuarios");
+            return RedirectToAction("PedidosUsuario", "Pedidos");
+        }
+
+        public IActionResult PedidosUsuario()
+        {
+            int usuario = Convert.ToInt32(HttpContext.Session.GetString("USER"));
+            List<Pedido> pedidos = this.repo.GetPedidosUsuario(usuario);
+            return View(pedidos);
+        }
+
+        public IActionResult ProductosPedido(int idpedido)
+        {
+            List<int> cantidades = new List<int>();
+            List<Producto> productos = this.repo.GetProductosPedido(idpedido, ref cantidades);
+            ViewData["CANTIDADES"] = cantidades;
+            return View(productos);
+        }
+
+        public IActionResult Cancelar()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Cancelar(int idpedido)
+        {
+            this.repo.CancelarPedido(idpedido);
+            return RedirectToAction("PedidosUsuario", "Pedidos");
         }
     }
 }

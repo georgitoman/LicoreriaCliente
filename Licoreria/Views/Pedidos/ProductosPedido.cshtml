@@ -1,0 +1,50 @@
+﻿@model IEnumerable<Licoreria.Models.Producto>
+
+@{
+    ViewData["Title"] = "ProductosPedido";
+    List<int> cantidades = ViewData["CANTIDADES"] as List<int>;
+    int contador = 0;
+}
+
+<h1>ProductosPedido</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Nombre)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Precio)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Litros)
+            </th>
+            <th>
+                Cantidad
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Nombre)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Precio)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Litros)
+                </td>
+                <td>
+                    @cantidades[contador]
+                    @{ 
+                        contador++;
+                    }
+                </td>
+            </tr>
+}
+    </tbody>
+</table>
