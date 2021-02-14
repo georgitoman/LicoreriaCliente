@@ -13,19 +13,21 @@ namespace Licoreria.Repositories
 
         String GetNombreCategoria(int idcategoria);
 
-        List<Producto> GetProductos();
-
-        List<Producto> GetProductos(int idcategoria);
-
-        List<Producto> GetProductosMini();
-
-        List<Producto> GetProductosMaxi();
+        List<Producto> GetProductos(int posicion, ref int salida,
+            String nombre, decimal? preciomax,
+            decimal? litros, bool? stock, int? idcategoria);
 
         List<Producto> BuscarProductosNombre(String nombre);
 
         Producto BuscarProducto(int idproducto);
 
         int GetStock(int idproducto);
+
+        decimal GetPrecioMax(int? idcategoria);
+
+        decimal GetPrecioMin(int? idcategoria);
+
+        List<decimal> GetListaLitros();
 
         Usuario BuscarUsuario(int idusuario);
 

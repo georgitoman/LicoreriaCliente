@@ -22,13 +22,15 @@ namespace Licoreria.Models
         public byte[] Password { get; set; }
         [Column("SALT")]
         public String Salt { get; set; }
-        [Column("VALIDADO")]
-        public bool Validado { get; set; }
         [Column("CORREO")]
         public String Correo { get; set; }
+        [Column("DIRECCION")]
+        public String Direccion { get; set; }
         [Column("TELEFONO")]
         public String Telefono { get; set; }
         [Column("ROL")]
         public int Rol { get; set; }
+        [Column("VALIDADO")]
+        public bool Validado { get; set; }
     }
 }

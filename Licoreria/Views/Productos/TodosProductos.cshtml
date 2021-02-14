@@ -1,7 +1,19 @@
 ﻿@model IEnumerable<Licoreria.Models.Producto>
 
 @{
-    ViewData["Title"] = "Productos";
+    int ultimo = (int)ViewData["ULTIMO"];
+    int num = 0;
+
+    List<decimal> listalitros = ViewData["LISTALITROS"] as List<decimal>;
+
+    decimal precio;
+    if (ViewData["PRECIOMAX"] == null)
+        precio = (decimal)ViewData["MAX"];
+    else
+        precio = (decimal)ViewData["PRECIOMAX"];
+
+    Carrito sessioncar = Context.Session.GetObject<Carrito>("CARRITO");
+
 }
 
 @section scripts{
@@ -10,57 +22,166 @@
             var mensaje = '@TempData["ALERTA"]';
             if (mensaje)
                 alert(mensaje);
+
+            $("#chbstock").click(function () {
+                if (this.checked) {
+                    $(this).val("true");
+                } else {
+                    $(this).val("false");
+                }
+            });
         });
     </script>
 }
 
-<h1>@ViewData["NOMBRECAT"]</h1>
+<form method="post">
+    <input type="hidden" name="idcategoria" value="@ViewData["IDCATEGORIA"]" />
+    <ul class="list-group list-group-horizontal">
+        <li class="list-group-item">
+            <label>Precio maximo: </label>
+            <input type="range" max="@ViewData["MAX"]" min="@ViewData["MIN"]"
+                   name="preciomax" step="0.01" value="@precio"
+                   oninput="document.getElementById('rangevalue').innerHTML = this.value + '€'" />
+            <span id="rangevalue">@precio €</span>
+        </li>
+        <li class="list-group-item">
+            <label>Litros: </label>
+            <select name="litros">
+                <option></option>
+                @foreach (decimal lit in listalitros)
+                {
+                    if (ViewData["LITROS"] != null)
+                    {
+                        if (lit == (decimal)ViewData["LITROS"])
+                        {
+                            <option value="@lit" selected>@lit</option>
+                        }
+                        else
+                        {
+                            <option value="@lit">@lit</option>
+                        }
+                    }
+                    else
+                    {
+                        <option value="@lit">@lit</option>
+                    }
+                }
+            </select>
+        </li>
+        <li class="list-group-item">
+            <label>En stock: </label>
+            @if (ViewData["STOCK"] != null)
+            {
+                if ((bool)ViewData["STOCK"] == true)
+                {
+                    <input id="chbstock" type="checkbox" name="stock" value="true" checked />
+                }
+                else
+                {
+                    <input id="chbstock" type="checkbox" name="stock" value="false" />
+                }
+            } else
+            {
+                <input id="chbstock" type="checkbox" name="stock" value="false" />
+            }
+        </li>
+        <li class="list-group-item">
+            <button type="submit" class="btn btn-outline-info">Filtrar</button>
+            <a class="btn btn-sm btn-dark" asp-action="TodosProductos" asp-controller="Productos" asp-route-idcategoria="@ViewData["IDCATEGORIA"]">Reset</a>
+        </li>
+    </ul>
+</form>
+
+<h1>@ViewData["TITULO"]</h1>
+<h1>@ViewData["BUSQUEDA"]</h1>
 <div class="album py-5 bg-light">
     <div class="container">
         <div class="row">
-            @foreach (var item in Model)
+            @if (Model.Any())
             {
-                <div class="col-md-4">
-                    <div class="card mb-4 box-shadow">
-                        <div class="embed-responsive embed-responsive-4by3">
-                            <img class="card-img embed-responsive-item" src="~/images/@item.Imagen" alt="Imagen no disponible" style="object-fit:contain" />
-                        </div>
-                        <div class="card-body">
-                            @if (item.Stock == 0)
-                            {
-                                <small class="card-subtitle text-danger">Producto agotado</small>
-                                <p class="card-title">@item.Nombre @item.Litros L</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <button type="button" disabled class="btn btn-outline-danger">No disponible</button>
-                                    <p class="card-text">@item.Precio €</p>
-                                </div>
-                            }
-                            else
-                            {
-                                if (item.Stock < 10)
+                @foreach (var item in Model)
+                {
+                    <div class="col-md-4">
+                        <div class="card mb-4 box-shadow">
+                            <div class="embed-responsive embed-responsive-4by3">
+                                <img class="card-img embed-responsive-item" src="~/images/@item.Imagen" alt="Imagen no disponible" style="object-fit:contain" />
+                            </div>
+                            <div class="card-body">
+                                @if (item.Stock == 0)
                                 {
-                                    <small class="card-subtitle text-warning">¡¡Ultimas @item.Stock unidades!!</small>
+                                    <small class="card-subtitle text-danger">Producto agotado</small>
+                                    <p class="card-title">@item.Nombre @item.Litros L</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <button type="button" disabled class="btn btn-outline-danger">No disponible</button>
+                                        <p class="card-text">@item.Precio €</p>
+                                    </div>
                                 }
                                 else
                                 {
-                                    <small class="card-subtitle text-success">Producto disponible</small>
+                                    if (item.Stock < 10)
+                                    {
+                                        <small class="card-subtitle text-warning">¡¡Ultimas @item.Stock unidades!!</small>
+                                    }
+                                    else
+                                    {
+                                        <small class="card-subtitle text-success">Producto disponible</small>
+                                    }
+                                    <p class="card-title">@item.Nombre @item.Litros L</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <form method="post" asp-action="AddCarrito" asp-controller="Productos">
+                                            <input type="hidden" name="idproducto" value="@item.IdProducto" />
+                                            <input type="hidden" name="redirect" value="@Context.Request.GetDisplayUrl()" />
+                                            @if (sessioncar != null)
+                                            {
+                                                if (sessioncar.Productos.Contains(item.IdProducto))
+                                                {
+                                                    int cantidad = sessioncar.Cantidades[sessioncar.Productos.IndexOf(item.IdProducto)];
+                                                    <input type="number" name="cantidad" style="width:45px" value="@cantidad" min="1" max="50" />
+                                                }
+                                                else
+                                                {
+                                                    <input type="number" name="cantidad" style="width:45px" value="1" min="1" max="50" />
+                                                }
+                                            } else
+                                            {
+                                                <input type="number" name="cantidad" style="width:45px" value="1" min="1" max="50" />
+                                            }
+                                            <button type="submit" class="btn btn-info">Añadir a carrito</button>
+                                        </form>
+                                        <p class="card-text">@item.Precio €</p>
+                                    </div>
                                 }
-                                <p class="card-title">@item.Nombre @item.Litros L</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <form method="post">
-                                        <input type="hidden" name="idproducto" value="@item.IdProducto" />
-                                        <input type="number" name="cantidad" style="width:45px" value="1" min="1" max="50" />
-                                        <button type="submit" class="btn btn-info">Añadir a carrito</button>
-                                    </form>
-                                    <p class="card-text">@item.Precio €</p>
-                                </div>
-
-                            }
-
+                            </div>
                         </div>
                     </div>
-                </div>
+                }
             }
+            else
+            {
+                <h1 style="color:indianred">Sin resultados</h1>
+            }
+        </div>
+    </div>
+    <div class="container-sm">
+        <div class="d-flex justify-content-center align-items-center">
+            <ul class="list-group list-group-horizontal-sm">
+                @for (int i = 1; i <= ultimo; i += 6)
+                {
+                    num++;
+                    <li class="list-group-item small">
+                        <a asp-action="TodosProductos"
+                           asp-controller="Productos"
+                           asp-route-posicion="@i"
+                           asp-route-nombre="@ViewData["NOMBRE"]"
+                           asp-route-preciomax="@ViewData["PRECIOMAX"]"
+                           asp-route-litros="@ViewData["LITROS"]"
+                           asp-route-stock="@ViewData["STOCK"]"
+                           asp-route-idcategoria="@ViewData["IDCATEGORIA"]">
+                            @num
+                        </a>
+                    </li>
+                }
+            </ul>
         </div>
     </div>
 </div>

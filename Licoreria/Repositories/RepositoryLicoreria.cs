@@ -1,6 +1,8 @@
 ﻿using Licoreria.Data;
 using Licoreria.Helpers;
 using Licoreria.Models;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +10,41 @@ using System.Threading.Tasks;
 
 namespace Licoreria.Repositories
 {
+    #region SQL
+
+    //CREATE PROCEDURE PAGINARPRODUCTOSFILTROS
+    //(@POSICION INT, @NOMBRE NVARCHAR(50) = NULL,
+    //@PRECIOMAX DECIMAL(10, 2) = NULL, @LITROS DECIMAL(10, 2) = NULL, @STOCK BIT = NULL,
+    //@IDCATEGORIA INT = NULL, @REGISTROS INT OUT)
+    //AS
+    //    SELECT @REGISTROS = COUNT(IDPRODUCTO) FROM PRODUCTO
+    //    WHERE
+    //    (@NOMBRE IS NULL OR NOMBRE LIKE '%' + @NOMBRE + '%')
+    //    AND
+    //    (@PRECIOMAX IS NULL OR PRECIO <= @PRECIOMAX)
+    //    AND
+    //    (@LITROS IS NULL OR LITROS = @LITROS)
+    //    AND
+    //    (@STOCK IS NULL OR STOCK != 0)
+    //    AND
+    //    (@IDCATEGORIA IS NULL OR IDCATEGORIA = @IDCATEGORIA)
+    //    SELECT* FROM
+    //    (SELECT ROW_NUMBER() OVER (ORDER BY NOMBRE) AS POSICION, PRODUCTO.* FROM PRODUCTO
+    //    WHERE
+    //    (@NOMBRE IS NULL OR NOMBRE LIKE '%' + @NOMBRE + '%')
+    //    AND
+    //    (@PRECIOMAX IS NULL OR PRECIO <= @PRECIOMAX)
+    //    AND
+    //    (@LITROS IS NULL OR LITROS = @LITROS)
+    //    AND
+    //    (@STOCK IS NULL OR STOCK != 0)
+    //    AND
+    //    (@IDCATEGORIA IS NULL OR IDCATEGORIA = @IDCATEGORIA)) AS CONSULTA
+    //    WHERE POSICION >= @POSICION AND POSICION<(@POSICION + 6)
+    //GO
+
+    #endregion
+
     public class RepositoryLicoreria: IRepositoryLicoreria
     {
         LicoreriaContext context;
@@ -34,24 +71,64 @@ namespace Licoreria.Repositories
 
         #region PRODUCTOS
 
-        public List<Producto> GetProductos()
+        public List<Producto> GetProductos(int posicion, ref int salida,
+            String nombre, decimal? preciomax,
+            decimal? litros, bool? stock, int? idcategoria)
         {
-            return this.context.Productos.ToList();
-        }
+            String sql = "PAGINARPRODUCTOSFILTROS @POSICION, @NOMBRE, @PRECIOMAX, @LITROS, @STOCK, @IDCATEGORIA, @REGISTROS OUT";
+            SqlParameter pampos = new SqlParameter("@POSICION", posicion);
+            SqlParameter pamreg = new SqlParameter("@REGISTROS", -1);
+            pamreg.Direction = System.Data.ParameterDirection.Output;
 
-        public List<Producto> GetProductos(int idcategoria)
-        {
-            return this.context.Productos.Where(z => z.Categoria == idcategoria).ToList();
-        }
+            int contador = 0;
+            object[] parametros = new object[7];
+            parametros[contador] = pampos;
+            contador++;
+            parametros[contador] = pamreg;
+            contador++;
 
-        public List<Producto> GetProductosMini()
-        {
-            return this.context.Productos.Where(z => z.Litros <= 0.20M).ToList();
-        }
+            SqlParameter pamnom;
+            if (nombre == null)
+                pamnom = new SqlParameter("@NOMBRE", DBNull.Value);
+            else
+                pamnom = new SqlParameter("@NOMBRE", nombre);
+            parametros[contador] = pamnom;
+            contador++;
 
-        public List<Producto> GetProductosMaxi()
-        {
-            return this.context.Productos.Where(z => z.Litros >= 1.50M).ToList();
+            SqlParameter pampmax;
+            if (preciomax == null)
+                pampmax = new SqlParameter("@PRECIOMAX", DBNull.Value);
+            else
+                pampmax = new SqlParameter("@PRECIOMAX", preciomax);
+            parametros[contador] = pampmax;
+            contador++;
+
+            SqlParameter pamlit;
+            if (litros == null)
+                pamlit = new SqlParameter("@LITROS", DBNull.Value);
+            else
+                pamlit = new SqlParameter("@LITROS", litros);
+            parametros[contador] = pamlit;
+            contador++;
+
+            SqlParameter pamsto;
+            if (stock == null)
+                pamsto = new SqlParameter("@STOCK", DBNull.Value);
+            else
+                pamsto = new SqlParameter("@STOCK", stock);
+            parametros[contador] = pamsto;
+            contador++;
+
+            SqlParameter pamcat;
+            if (idcategoria == null)
+                pamcat = new SqlParameter("@IDCATEGORIA", DBNull.Value);
+            else
+                pamcat = new SqlParameter("@IDCATEGORIA", idcategoria);
+            parametros[contador] = pamcat;
+
+            List<Producto> productos = this.context.Productos.FromSqlRaw(sql, parametros).ToList();
+            salida = Convert.ToInt32(pamreg.Value);
+            return productos;
         }
 
         public List<Producto> BuscarProductosNombre(String nombre)
@@ -69,6 +146,29 @@ namespace Licoreria.Repositories
         public Producto BuscarProducto(int idproducto)
         {
             return this.context.Productos.Where(z => z.IdProducto == idproducto).FirstOrDefault();
+        }
+
+        public List<decimal> GetListaLitros()
+        {
+            return this.context.Productos.Select(z => z.Litros).Distinct().ToList();
+        }
+
+        public decimal GetPrecioMax(int? idcategoria)
+        {
+            if (idcategoria == null)
+                return this.context.Productos.Select(z => z.Precio).Max();
+            else
+                return this.context.Productos.Where(z => z.Categoria == idcategoria)
+                    .Select(z => z.Precio).Max();
+        }
+
+        public decimal GetPrecioMin(int? idcategoria)
+        {
+            if (idcategoria == null)
+                return this.context.Productos.Select(z => z.Precio).Min();
+            else
+                return this.context.Productos.Where(z => z.Categoria == idcategoria)
+                    .Select(z => z.Precio).Min();
         }
 
         public List<Producto> GetListaProductos(List<int> idproductos)

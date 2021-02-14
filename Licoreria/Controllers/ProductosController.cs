@@ -18,72 +18,121 @@ namespace Licoreria.Controllers
             this.repo = repo;
         }
 
-        public IActionResult ProductosCategoria(int idcategoria)
+        public IActionResult TodosProductos(int? posicion, String nombre,
+            decimal? preciomax, decimal? litros, bool? stock,
+            int? idcategoria)
         {
-            List<Producto> productos = repo.GetProductos(idcategoria);
-            ViewData["NOMBRECAT"] = this.repo.GetNombreCategoria(idcategoria);
-            TempData["CATEGORIA"] = idcategoria;
+            if(posicion == null)
+            {
+                posicion = 1;
+            }
+            int ultimo = 0;
+
+            List<Producto> productos = repo.GetProductos(posicion.Value, ref ultimo, nombre,
+                preciomax, litros, stock, idcategoria);
+
+            if (nombre != null)
+            {
+                ViewData["NOMBRE"] = nombre;
+                ViewData["BUSQUEDA"] = "Resultados de busqueda: " + nombre;
+            }
+            if (preciomax != null)
+            {
+                ViewData["PRECIOMAX"] = preciomax.Value;
+            }
+            if (litros != null)
+            {
+                ViewData["LITROS"] = litros.Value;
+            }
+            if (stock != null)
+            {
+                ViewData["STOCK"] = stock.Value;
+            }
+            if (idcategoria != null)
+            {
+                ViewData["IDCATEGORIA"] = idcategoria.Value;
+                ViewData["TITULO"] = this.repo.GetNombreCategoria(idcategoria.Value);
+                ViewData["MAX"] = this.repo.GetPrecioMax(idcategoria.Value);
+                ViewData["MIN"] = this.repo.GetPrecioMin(idcategoria.Value);
+            }
+            else
+            {
+                ViewData["MAX"] = this.repo.GetPrecioMax(null);
+                ViewData["MIN"] = this.repo.GetPrecioMin(null);
+            }
+
+            ViewData["ULTIMO"] = ultimo;
+            
+            ViewData["LISTALITROS"] = this.repo.GetListaLitros();
+
             return View(productos);
         }
 
         [HttpPost]
-        public IActionResult ProductosCategoria(int idproducto, int cantidad)
+        public IActionResult TodosProductos(String nombre,
+            decimal? preciomax, decimal? litros, String stock,
+            int? idcategoria)
         {
-            Carrito sessioncar;
-            if (HttpContext.Session.GetObject<Carrito>("CARRITO") == null)
+            if (nombre != null)
             {
-                sessioncar = new Carrito();
-                sessioncar.Productos = new List<int>();
-                sessioncar.Cantidades = new List<int>();
+                ViewData["NOMBRE"] = nombre;
+                ViewData["BUSQUEDA"] = "Resultados de busqueda: " + nombre;
             }
-            else
+            if (litros != null)
             {
-                sessioncar = HttpContext.Session.GetObject<Carrito>("CARRITO");
+                ViewData["LITROS"] = litros.Value;
             }
-
-            int stock = this.repo.GetStock(idproducto);
-            if (sessioncar.Productos.Contains(idproducto) == false)
+            bool? boolstock = null;
+            if (stock != null)
             {
-                if (stock < cantidad)
+                if (stock == "true")
                 {
-                    cantidad = stock;
-                    TempData["ALERTA"] = "No hay suficiente stock. Se han metido " + cantidad + " productos a su carrito.";
+                    ViewData["STOCK"] = true;
+                    boolstock = true;
                 }
-                sessioncar.Productos.Add(idproducto);
-                sessioncar.Cantidades.Add(cantidad);
-                HttpContext.Session.SetObject("CARRITO", sessioncar);
+                else
+                    ViewData["STOCK"] = null;
+            }
+            if (idcategoria != null)
+            {
+                ViewData["IDCATEGORIA"] = idcategoria.Value;
+                ViewData["TITULO"] = this.repo.GetNombreCategoria(idcategoria.Value);
+                ViewData["MAX"] = this.repo.GetPrecioMax(idcategoria.Value);
+                ViewData["MIN"] = this.repo.GetPrecioMin(idcategoria.Value);
             } else
             {
-                int i = sessioncar.Productos.IndexOf(idproducto);
-                int cantidadtotal = cantidad + sessioncar.Cantidades[i];
-                if(stock < cantidadtotal)
-                {
-                    if(sessioncar.Cantidades[i] == stock)
-                        TempData["ALERTA"] = "No hay suficiente stock.";
-                    else
-                        TempData["ALERTA"] = "No hay suficiente stock. Se han metido " + (stock - sessioncar.Cantidades[i]) + " productos extras a su carrito.";
-                    cantidadtotal = stock;
-                }
-                sessioncar.Cantidades[i] = cantidadtotal;
-                HttpContext.Session.SetObject("CARRITO", sessioncar);
+                ViewData["MAX"] = this.repo.GetPrecioMax(null);
+                ViewData["MIN"] = this.repo.GetPrecioMin(null);
+            }
+            if (preciomax != null)
+            {
+                if (preciomax == (decimal)ViewData["MAX"])
+                    ViewData["PRECIOMAX"] = null;
+                else
+                    ViewData["PRECIOMAX"] = preciomax.Value;
             }
 
-            int idcategoria = Convert.ToInt32(TempData["CATEGORIA"]);
-            ViewData["NOMBRECAT"] = this.repo.GetNombreCategoria(idcategoria);
-            TempData["CATEGORIA"] = idcategoria;
-            List<Producto> productos = this.repo.GetProductos(idcategoria);
+            ViewData["LISTALITROS"] = this.repo.GetListaLitros();
+            int ultimo = 0;
+            
+            List<Producto> productos = repo.GetProductos(1, ref ultimo, nombre,
+                preciomax, litros, boolstock, idcategoria);
 
-            return View(productos);
-        }
+            ViewData["ULTIMO"] = ultimo;
 
-        public IActionResult TodosProductos()
-        {
-            List<Producto> productos = repo.GetProductos();
-            return View(productos);
+            return RedirectToAction("TodosProductos", "Productos", new
+            {
+                posicion = ViewData["POSICION"],
+                nombre = ViewData["NOMBRE"],
+                preciomax = ViewData["PRECIOMAX"],
+                litros = ViewData["LITROS"],
+                stock = ViewData["STOCK"],
+                idcategoria = ViewData["IDCATEGORIA"]
+            });
         }
 
         [HttpPost]
-        public IActionResult TodosProductos(int idproducto, int cantidad)
+        public IActionResult AddCarrito(int idproducto, int cantidad, String redirect)
         {
             Carrito sessioncar;
             if (HttpContext.Session.GetObject<Carrito>("CARRITO") == null)
@@ -112,132 +161,22 @@ namespace Licoreria.Controllers
             else
             {
                 int i = sessioncar.Productos.IndexOf(idproducto);
-                int cantidadtotal = cantidad + sessioncar.Cantidades[i];
-                if (stock < cantidadtotal)
-                {
-                    if (sessioncar.Cantidades[i] == stock)
-                        TempData["ALERTA"] = "No hay suficiente stock.";
-                    else
-                        TempData["ALERTA"] = "No hay suficiente stock. Se han metido " + (stock - sessioncar.Cantidades[i]) + " productos extras a su carrito.";
-                    cantidadtotal = stock;
-                }
-                sessioncar.Cantidades[i] = cantidadtotal;
-                HttpContext.Session.SetObject("CARRITO", sessioncar);
-            }
-
-            int idcategoria = Convert.ToInt32(TempData["CATEGORIA"]);
-            ViewData["NOMBRECAT"] = this.repo.GetNombreCategoria(idcategoria);
-            TempData["CATEGORIA"] = idcategoria;
-            List<Producto> productos = this.repo.GetProductos(idcategoria);
-
-            return View(productos);
-        }
-
-        public IActionResult MicroAlcoholismo()
-        {
-            List<Producto> productos = repo.GetProductosMini();
-            return View(productos);
-        }
-
-        [HttpPost]
-        public IActionResult MicroAlcoholismo(int idproducto, int cantidad)
-        {
-            Carrito sessioncar;
-            if (HttpContext.Session.GetObject<Carrito>("CARRITO") == null)
-            {
-                sessioncar = new Carrito();
-                sessioncar.Productos = new List<int>();
-                sessioncar.Cantidades = new List<int>();
-            }
-            else
-            {
-                sessioncar = HttpContext.Session.GetObject<Carrito>("CARRITO");
-            }
-
-            int stock = this.repo.GetStock(idproducto);
-            if (sessioncar.Productos.Contains(idproducto) == false)
-            {
                 if (stock < cantidad)
                 {
-                    cantidad = stock;
-                    TempData["ALERTA"] = "No hay suficiente stock. Se han metido " + cantidad + " productos a su carrito.";
-                }
-                sessioncar.Productos.Add(idproducto);
-                sessioncar.Cantidades.Add(cantidad);
-                HttpContext.Session.SetObject("CARRITO", sessioncar);
-            }
-            else
-            {
-                int i = sessioncar.Productos.IndexOf(idproducto);
-                int cantidadtotal = cantidad + sessioncar.Cantidades[i];
-                if (stock < cantidadtotal)
-                {
                     if (sessioncar.Cantidades[i] == stock)
                         TempData["ALERTA"] = "No hay suficiente stock.";
                     else
                         TempData["ALERTA"] = "No hay suficiente stock. Se han metido " + (stock - sessioncar.Cantidades[i]) + " productos extras a su carrito.";
-                    cantidadtotal = stock;
-                }
-                sessioncar.Cantidades[i] = cantidadtotal;
-                HttpContext.Session.SetObject("CARRITO", sessioncar);
-            }
-            List<Producto> productos = repo.GetProductosMini();
-            return View(productos);
-        }
-
-        public IActionResult MacroAlcoholismo()
-        {
-            List<Producto> productos = repo.GetProductosMaxi();
-            return View(productos);
-        }
-
-        [HttpPost]
-        public IActionResult MacroAlcoholismo(int idproducto, int cantidad)
-        {
-            Carrito sessioncar;
-            if (HttpContext.Session.GetObject<Carrito>("CARRITO") == null)
-            {
-                sessioncar = new Carrito();
-                sessioncar.Productos = new List<int>();
-                sessioncar.Cantidades = new List<int>();
-            }
-            else
-            {
-                sessioncar = HttpContext.Session.GetObject<Carrito>("CARRITO");
-            }
-
-            int stock = this.repo.GetStock(idproducto);
-            if (sessioncar.Productos.Contains(idproducto) == false)
-            {
-                if (stock < cantidad)
-                {
                     cantidad = stock;
-                    TempData["ALERTA"] = "No hay suficiente stock. Se han metido " + cantidad + " productos a su carrito.";
                 }
-                sessioncar.Productos.Add(idproducto);
-                sessioncar.Cantidades.Add(cantidad);
+                sessioncar.Cantidades[i] = cantidad;
                 HttpContext.Session.SetObject("CARRITO", sessioncar);
             }
-            else
-            {
-                int i = sessioncar.Productos.IndexOf(idproducto);
-                int cantidadtotal = cantidad + sessioncar.Cantidades[i];
-                if (stock < cantidadtotal)
-                {
-                    if (sessioncar.Cantidades[i] == stock)
-                        TempData["ALERTA"] = "No hay suficiente stock.";
-                    else
-                        TempData["ALERTA"] = "No hay suficiente stock. Se han metido " + (stock - sessioncar.Cantidades[i]) + " productos extras a su carrito.";
-                    cantidadtotal = stock;
-                }
-                sessioncar.Cantidades[i] = cantidadtotal;
-                HttpContext.Session.SetObject("CARRITO", sessioncar);
-            }
-            List<Producto> productos = repo.GetProductosMaxi();
-            return View(productos);
+
+            return Redirect(redirect);
         }
 
-        public IActionResult Carrito(int? pos, int? cantidad)
+        public IActionResult Carrito()
         {
             Carrito sessioncar = HttpContext.Session.GetObject<Carrito>("CARRITO");
             if(sessioncar == null)
