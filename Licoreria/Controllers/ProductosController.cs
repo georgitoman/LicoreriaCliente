@@ -15,11 +15,13 @@ namespace Licoreria.Controllers
     public class ProductosController : Controller
     {
         IRepositoryLicoreria repo;
+        PathProvider PathProvider;
         UploadService UploadService;
 
-        public ProductosController(IRepositoryLicoreria repo, UploadService us)
+        public ProductosController(IRepositoryLicoreria repo, PathProvider pathprovider, UploadService us)
         {
             this.repo = repo;
+            this.PathProvider = pathprovider;
             this.UploadService = us;
         }
 
@@ -249,15 +251,60 @@ namespace Licoreria.Controllers
             return RedirectToAction("GestionIndex", "Productos");
         }
 
-        public IActionResult EditarProducto()
+        public IActionResult SeleccionarProducto()
+        {
+            List<Producto> productos = this.repo.GetProductos();
+            return View(productos);
+        }
+
+        public IActionResult EditarProducto(int idproducto)
+        {
+            ViewData["CATEGORIAS"] = this.repo.GetCategorias();
+            Producto producto = this.repo.BuscarProducto(idproducto);
+            TempData["NOMBREIMAGEN"] = producto.Imagen;
+            return PartialView("_EditarProductoPartial", producto);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditarProducto(int idproducto, String nombre, decimal precio, int stock, IFormFile imagen, decimal litros, int idcategoria)
+        {
+            String imagenanterior = TempData["NOMBREIMAGEN"].ToString();
+            String filename = null;
+            if (imagen != null)
+            {
+                String ruta = PathProvider.MapPath(imagenanterior, Folders.Images);
+                FileInfo fieliminar = new FileInfo(ruta);
+                fieliminar.Delete();
+
+                FileInfo fi = new FileInfo(imagen.FileName);
+                String extension = fi.Extension;
+                filename = ToolkitService.NormalizeName(extension, nombre, litros.ToString());
+                await this.UploadService.UploadFileAsync(imagen, Folders.Images, filename);
+            }
+
+            this.repo.EditarProducto(idproducto, nombre, precio, stock, filename, litros, idcategoria);
+            return RedirectToAction("SeleccionarProducto", "Productos");
+        }
+
+        public IActionResult EliminarProducto()
         {
             return View();
         }
 
         [HttpPost]
-        public IActionResult EditarProducto(String nombre, decimal precio, int stock, String imagen, decimal litros, int idcategoria)
+        public IActionResult EliminarProducto(int idproducto)
         {
-            return View();
+            Producto prod = this.repo.BuscarProducto(idproducto);
+            String imagen = prod.Imagen;
+            if(imagen != null)
+            {
+                String ruta = PathProvider.MapPath(imagen, Folders.Images);
+                FileInfo fieliminar = new FileInfo(ruta);
+                fieliminar.Delete();
+            }
+
+            this.repo.EliminarProducto(idproducto);
+            return RedirectToAction("SeleccionarProducto", "Productos");
         }
 
         #endregion

@@ -1,0 +1,57 @@
+﻿@model IEnumerable<Licoreria.Models.Producto>
+
+@{
+    ViewData["Title"] = "SeleccionarProducto";
+}
+
+@section scripts{ 
+    <script>
+        $(document).ready(function () {
+            $("#btnseleccionar").click(function () {
+                var idproducto = $("#idprod option:selected").val();
+                $("#capaeditar").load("/Productos/EditarProducto/?idproducto=" + idproducto);
+            });
+
+            $("#btneliminar").click(function () {
+                var id = $("#idprod option:selected").val();
+                var el = confirm("Eliminar producto?");
+                if (el) {
+                    $.ajax({
+                        url: "/Productos/EliminarProducto",
+                        data: { idproducto: id },
+                        type: "POST",
+                        success: function () {
+                            alert("Producto eliminado con exito");
+                            location.reload();
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}
+
+<h1>Modificar Producto</h1>
+
+
+<select id="idprod" class="form-control">
+    @foreach (var item in Model)
+    {
+        <option value="@item.IdProducto">
+            @item.Nombre @item.Litros
+        </option>
+    }
+</select>
+<button id="btnseleccionar" class="btn btn-outline-warning" type="button">
+    Modificar
+</button>
+<button id="btneliminar" class="btn btn-outline-danger" type="button">
+    Eliminar
+</button>
+
+<div id="capaeditar"></div>
+
+<div>
+    <a asp-action="GestionIndex" asp-controller="Productos">Volver</a>
+</div>
+

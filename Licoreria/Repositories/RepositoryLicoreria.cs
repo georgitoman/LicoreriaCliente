@@ -131,6 +131,11 @@ namespace Licoreria.Repositories
             return productos;
         }
 
+        public List<Producto> GetProductos()
+        {
+            return this.context.Productos.ToList();
+        }
+
         public void InsertarProducto(String nombre, decimal precio, int stock,
             String imagen, decimal litros, int idcategoria)
         {
@@ -154,11 +159,20 @@ namespace Licoreria.Repositories
             prod.Nombre = nombre;
             prod.Precio = precio;
             prod.Stock = stock;
-            prod.Imagen = imagen;
+            if(imagen != null)
+                prod.Imagen = imagen;
             prod.Litros = litros;
             prod.Categoria = idcategoria;
 
-            this.context.Productos.Add(prod);
+            this.context.SaveChanges();
+        }
+
+        public void EliminarProducto(int idproducto)
+        {
+            Producto prod = this.BuscarProducto(idproducto);
+
+            this.context.Productos.Remove(prod);
+
             this.context.SaveChanges();
         }
 

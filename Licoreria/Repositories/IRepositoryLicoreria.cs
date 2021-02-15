@@ -13,6 +13,8 @@ namespace Licoreria.Repositories
 
         String GetNombreCategoria(int idcategoria);
 
+        List<Producto> GetProductos();
+
         List<Producto> GetProductos(int posicion, ref int salida,
             String nombre, decimal? preciomax,
             decimal? litros, bool? stock, int? idcategoria);
@@ -20,6 +22,8 @@ namespace Licoreria.Repositories
         void InsertarProducto(String nombre, decimal precio, int stock, String imagen, decimal litros, int idcategoria);
 
         void EditarProducto(int idproducto, String nombre, decimal precio, int stock, String imagen, decimal litros, int idcategoria);
+
+        void EliminarProducto(int idproducto);
 
         Producto BuscarProducto(int idproducto);
 
