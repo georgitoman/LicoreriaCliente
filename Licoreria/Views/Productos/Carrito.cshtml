@@ -6,80 +6,75 @@
     decimal sumatotal = 0;
 }
 
-<h1>Carrito</h1>
-
-@if(Model != null)
+<div class="d-flex justify-content-center align-items-center">
+    <h1 class="toast-header bg-light">Carrito</h1>
+</div>
+@if (Model != null)
 {
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Nombre)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Litros)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Precio)
-            </th>
-            <th>
-                Cantidad
-            </th>
-            <th>
-                Total
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nombre)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Litros)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Precio) €
-            </td>
-            <td>
-                <form method="post">
-                    <input type="hidden" name="pos" value="@contador" />
-                    <input type="number" name="cantidad" style="width:45px" value="@cantidades[contador]" min="0" max="@item.Stock" />
-                    <button type="submit" class="btn-sm btn-outline-primary">
-                        Modificar
-                    </button>
-                </form>
-            </td>
-            <td>
-                @{ 
-                    decimal total = item.Precio * cantidades[contador];
-                    sumatotal += total;
-                    contador++;
-                }
-                @total €
-            </td>
-            <td></td>
-        </tr>
-        }
-    <tr>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td>@sumatotal €</td>
-        <td>
-            <a asp-action="TramitarPedido" asp-controller="Pedidos" class="btn btn-success">
-                Tramitar pedido
-            </a>
-        </td>
-    </tr>
-    </tbody>
-</table>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Nombre)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Precio)
+                </th>
+                <th>
+                    Cantidad
+                </th>
+                <th>
+                    Total
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @item.Nombre @item.Litros L
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Precio) €
+                    </td>
+                    <td>
+                        <form method="post">
+                            <input type="hidden" name="pos" value="@contador" />
+                            <input type="number" name="cantidad" style="width:45px" value="@cantidades[contador]" min="0" max="@item.Stock" />
+                            <button type="submit" class="btn-sm btn-outline-primary">
+                                Modificar
+                            </button>
+                        </form>
+                    </td>
+                    <td>
+                        @{
+                            decimal total = item.Precio * cantidades[contador];
+                            sumatotal += total;
+                            contador++;
+                        }
+                        @total €
+                    </td>
+                    <td></td>
+                </tr>
+            }
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>@sumatotal €</td>
+                <td>
+                    <a asp-action="TramitarPedido" asp-controller="Pedidos" class="btn btn-success">
+                        Tramitar pedido
+                    </a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 
-} else
+}
+else
 {
     <h1 style="color:darkblue">
         @ViewData["MENSAJE"]

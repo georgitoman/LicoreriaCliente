@@ -33,7 +33,11 @@ namespace Licoreria.ViewModels
         [Display(Name = "Correo")]
         public String Correo { get; set; }
 
-        [Phone]
+        [Required(ErrorMessage = "Por favor, introduce tu direccion")]
+        [Display(Name = "Direccion")]
+        public String Direccion { get; set; }
+
+        [Phone(ErrorMessage = "Formato de telefono no valido")]
         [Display(Name = "Telefono")]
         public String Telefono { get; set; }
     }

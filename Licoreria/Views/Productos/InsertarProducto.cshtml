@@ -5,55 +5,53 @@
     List<Categoria> categorias = ViewData["CATEGORIAS"] as List<Categoria>;
 }
 
-<h1>Insertar Producto</h1>
+<div class="d-flex justify-content-center align-items-center">
+    <h1 class="toast-header bg-light">Insertar producto</h1>
+</div>
 
 <hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="InsertarProducto" enctype="multipart/form-data">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Nombre" class="control-label"></label>
-                <input asp-for="Nombre" class="form-control" />
-                <span asp-validation-for="Nombre" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Precio" class="control-label"></label>
-                <input asp-for="Precio" class="form-control" />
-                <span asp-validation-for="Precio" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Stock" class="control-label"></label>
-                <input asp-for="Stock" class="form-control" />
-                <span asp-validation-for="Stock" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Imagen" class="control-label"></label>
-                <input type="file" name="imagen" class="form-control" />
-                <span asp-validation-for="Imagen" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Litros" class="control-label"></label>
-                <input asp-for="Litros" class="form-control" />
-                <span asp-validation-for="Litros" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <select asp-for="Categoria" name="idcategoria">
-                    @foreach(Categoria cat in categorias)
-                    {
-                        <option value="@cat.IdCategoria" class="form-check">
-                            @cat.Nombre
-                        </option>
-                    }
-                </select>
-                <span asp-validation-for="Categoria" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Insertar" class="btn btn-primary" />
-            </div>
-        </form>
+<form asp-action="InsertarProducto" enctype="multipart/form-data">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="Nombre" class="control-label"></label>
+        <input asp-for="Nombre" class="form-control" />
+        <span asp-validation-for="Nombre" class="text-danger"></span>
     </div>
-</div>
+    <div class="form-group">
+        <label asp-for="Precio" class="control-label"></label>
+        <input asp-for="Precio" class="form-control" />
+        <span asp-validation-for="Precio" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Stock" class="control-label"></label>
+        <input asp-for="Stock" class="form-control" />
+        <span asp-validation-for="Stock" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Imagen" class="control-label"></label>
+        <input type="file" name="imagen" class="form-control" />
+        <span asp-validation-for="Imagen" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Litros" class="control-label"></label>
+        <input asp-for="Litros" class="form-control" />
+        <span asp-validation-for="Litros" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <select asp-for="Categoria" name="idcategoria">
+            @foreach (Categoria cat in categorias)
+            {
+                <option value="@cat.IdCategoria" class="form-check">
+                    @cat.Nombre
+                </option>
+            }
+        </select>
+        <span asp-validation-for="Categoria" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Insertar" class="btn btn-primary" />
+    </div>
+</form>
 
 <div>
     <a asp-action="GestionIndex" asp-controller="Productos">Volver</a>

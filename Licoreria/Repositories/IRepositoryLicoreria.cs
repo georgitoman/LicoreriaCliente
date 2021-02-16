@@ -41,7 +41,11 @@ namespace Licoreria.Repositories
 
         Usuario BuscarUsuario(int idusuario);
 
-        void InsertarUsuario(String username, String nombre, String correo, String password, String telefono);
+        void InsertarUsuario(String username, String nombre, String correo, String password, String direccion, String telefono);
+
+        void EditarUsuario(int idusuario, String nombre, String direccion, String telefono);
+
+        void CambiarContraseña(int idusuario, String password);
 
         Usuario LoginUsuario(String username, String password);
 

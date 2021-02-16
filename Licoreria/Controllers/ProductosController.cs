@@ -1,4 +1,5 @@
 ﻿using Licoreria.Extensions;
+using Licoreria.Filters;
 using Licoreria.Helpers;
 using Licoreria.Models;
 using Licoreria.Repositories;
@@ -224,17 +225,20 @@ namespace Licoreria.Controllers
 
         #region ADMIN
 
+        [AuthorizeAdmin]
         public IActionResult GestionIndex()
         {
             return View();
         }
 
+        [AuthorizeAdmin]
         public IActionResult InsertarProducto()
         {
             ViewData["CATEGORIAS"] = this.repo.GetCategorias();
             return View();
         }
 
+        [AuthorizeAdmin]
         [HttpPost]
         public async Task<IActionResult> InsertarProducto(String nombre, decimal precio, int stock, IFormFile imagen, decimal litros, int idcategoria)
         {
@@ -251,12 +255,14 @@ namespace Licoreria.Controllers
             return RedirectToAction("GestionIndex", "Productos");
         }
 
+        [AuthorizeAdmin]
         public IActionResult SeleccionarProducto()
         {
             List<Producto> productos = this.repo.GetProductos();
             return View(productos);
         }
 
+        [AuthorizeAdmin]
         public IActionResult EditarProducto(int idproducto)
         {
             ViewData["CATEGORIAS"] = this.repo.GetCategorias();
@@ -265,6 +271,7 @@ namespace Licoreria.Controllers
             return PartialView("_EditarProductoPartial", producto);
         }
 
+        [AuthorizeAdmin]
         [HttpPost]
         public async Task<IActionResult> EditarProducto(int idproducto, String nombre, decimal precio, int stock, IFormFile imagen, decimal litros, int idcategoria)
         {
@@ -286,11 +293,13 @@ namespace Licoreria.Controllers
             return RedirectToAction("SeleccionarProducto", "Productos");
         }
 
+        [AuthorizeAdmin]
         public IActionResult EliminarProducto()
         {
             return View();
         }
 
+        [AuthorizeAdmin]
         [HttpPost]
         public IActionResult EliminarProducto(int idproducto)
         {

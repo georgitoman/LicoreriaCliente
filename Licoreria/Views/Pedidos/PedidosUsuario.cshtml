@@ -23,8 +23,12 @@
     </script>
 }
 
-<h1>Pedidos</h1>
+<div class="d-flex justify-content-center align-items-center">
+    <h1 class="toast-header bg-light">Mis pedidos</h1>
+</div>
 
+@if (Model.Any())
+{
 <table class="table">
     <thead>
         <tr>
@@ -63,4 +67,17 @@
         }
     </tbody>
 </table>
+}
+else
+{
+    <h1 style="color:cornflowerblue">No has realizado ningun pedido</h1>
+    <a asp-action="TodosProductos" asp-controller="Productos" class="nav-link">
+        Ir a comprar
+    </a>
+}
+
+<div>
+    <a asp-action="Perfil" asp-controller="Usuarios">Volver</a>
+</div>
+
 

@@ -20,5 +20,7 @@ namespace Licoreria.Models
         public DateTime Fecha { get; set; }
         [Column("COSTE")]
         public decimal Coste { get; set; }
+        [Column("DIRECCION")]
+        public String Direccion { get; set; }
     }
 }

@@ -16,6 +16,11 @@
 
 }
 
+@section styles{ 
+    <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/album/">
+    <link href="~/css/album.css" rel="stylesheet" />
+}
+
 @section scripts{
     <script>
         $(document).ready(function () {
@@ -34,67 +39,73 @@
     </script>
 }
 
+<h1 class="jumbotron-heading">@ViewData["TITULO"]</h1>
+
 <form method="post">
     <input type="hidden" name="idcategoria" value="@ViewData["IDCATEGORIA"]" />
-    <ul class="list-group list-group-horizontal">
-        <li class="list-group-item">
-            <label>Precio maximo: </label>
-            <input type="range" max="@ViewData["MAX"]" min="@ViewData["MIN"]"
-                   name="preciomax" step="0.01" value="@precio"
-                   oninput="document.getElementById('rangevalue').innerHTML = this.value + '€'" />
-            <span id="rangevalue">@precio €</span>
-        </li>
-        <li class="list-group-item">
-            <label>Litros: </label>
-            <select name="litros">
-                <option></option>
-                @foreach (decimal lit in listalitros)
-                {
-                    if (ViewData["LITROS"] != null)
+    <table class="table table-bordered">
+        <tr>
+            <td width="40%">
+                <label>Precio maximo: </label>
+                <input id="rangeprecio" type="range" max="@ViewData["MAX"]" min="@ViewData["MIN"]"
+                       name="preciomax" step="0.01" value="@precio"
+                       oninput="document.getElementById('rangevalue').value = this.value" />
+                <input type="number" step="0.01" id="rangevalue" style="width:75px" value="@precio" min="@ViewData["MIN"]" max="@ViewData["MAX"]"
+                       oninput="document.getElementById('rangeprecio').value = this.value"/>€
+            </td>
+            <td width="20%">
+                <label>Litros: </label>
+                <select name="litros">
+                    <option></option>
+                    @foreach (decimal lit in listalitros)
                     {
-                        if (lit == (decimal)ViewData["LITROS"])
+                        if (ViewData["LITROS"] != null)
                         {
-                            <option value="@lit" selected>@lit</option>
+                            if (lit == (decimal)ViewData["LITROS"])
+                            {
+                                <option value="@lit" selected>@lit L</option>
+                            }
+                            else
+                            {
+                                <option value="@lit">@lit L</option>
+                            }
                         }
                         else
                         {
-                            <option value="@lit">@lit</option>
+                            <option value="@lit">@lit L</option>
                         }
+                    }
+                </select>
+            </td>
+            <td width="20%">
+                <label>En stock: </label>
+                @if (ViewData["STOCK"] != null)
+                {
+                    if ((bool)ViewData["STOCK"] == true)
+                    {
+                        <input id="chbstock" type="checkbox" name="stock" value="true" checked />
                     }
                     else
                     {
-                        <option value="@lit">@lit</option>
+                        <input id="chbstock" type="checkbox" name="stock" value="false" />
                     }
-                }
-            </select>
-        </li>
-        <li class="list-group-item">
-            <label>En stock: </label>
-            @if (ViewData["STOCK"] != null)
-            {
-                if ((bool)ViewData["STOCK"] == true)
-                {
-                    <input id="chbstock" type="checkbox" name="stock" value="true" checked />
                 }
                 else
                 {
                     <input id="chbstock" type="checkbox" name="stock" value="false" />
                 }
-            } else
-            {
-                <input id="chbstock" type="checkbox" name="stock" value="false" />
-            }
-        </li>
-        <li class="list-group-item">
-            <button type="submit" class="btn btn-outline-info">Filtrar</button>
-            <a class="btn btn-sm btn-dark" asp-action="TodosProductos" asp-controller="Productos" asp-route-idcategoria="@ViewData["IDCATEGORIA"]">Reset</a>
-        </li>
-    </ul>
+            </td>
+            <td width="20%">
+                <button type="submit" class="btn btn-outline-info">Filtrar</button>
+                <a class="btn btn-sm btn-dark" asp-action="TodosProductos" asp-controller="Productos" asp-route-idcategoria="@ViewData["IDCATEGORIA"]">Reset</a>
+            </td>
+        </tr>
+    </table>
 </form>
 
-<h1>@ViewData["TITULO"]</h1>
-<h1>@ViewData["BUSQUEDA"]</h1>
-<div class="album py-5 bg-light">
+<h4>@ViewData["BUSQUEDA"]</h4>
+
+<div class="album py-5">
     <div class="container">
         <div class="row">
             @if (Model.Any())
@@ -142,7 +153,8 @@
                                                 {
                                                     <input type="number" name="cantidad" style="width:45px" value="1" min="1" max="50" />
                                                 }
-                                            } else
+                                            }
+                                            else
                                             {
                                                 <input type="number" name="cantidad" style="width:45px" value="1" min="1" max="50" />
                                             }
@@ -170,13 +182,13 @@
                     num++;
                     <li class="list-group-item small">
                         <a asp-action="TodosProductos"
-                           asp-controller="Productos"
-                           asp-route-posicion="@i"
-                           asp-route-nombre="@ViewData["NOMBRE"]"
-                           asp-route-preciomax="@ViewData["PRECIOMAX"]"
-                           asp-route-litros="@ViewData["LITROS"]"
-                           asp-route-stock="@ViewData["STOCK"]"
-                           asp-route-idcategoria="@ViewData["IDCATEGORIA"]">
+                            asp-controller="Productos"
+                            asp-route-posicion="@i"
+                            asp-route-nombre="@ViewData["NOMBRE"]"
+                            asp-route-preciomax="@ViewData["PRECIOMAX"]"
+                            asp-route-litros="@ViewData["LITROS"]"
+                            asp-route-stock="@ViewData["STOCK"]"
+                            asp-route-idcategoria="@ViewData["IDCATEGORIA"]">
                             @num
                         </a>
                     </li>

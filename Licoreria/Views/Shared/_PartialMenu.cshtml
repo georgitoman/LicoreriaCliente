@@ -1,34 +1,35 @@
-﻿@{
-    String usuario = Context.Session.GetString("USER");
-}
-
-@if (usuario == null)
+﻿@if (!Context.User.Identity.IsAuthenticated)
 {
     <ul class="navbar-nav ml-auto">
         <li class="nav-item">
-            <a class="nav-link" asp-action="LogIn" asp-controller="Usuarios">
+            <a class="nav-link" asp-action="Perfil" asp-controller="Usuarios">
                 Login
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" asp-action="GestionIndex" asp-controller="Productos">
-                Gestion
             </a>
         </li>
     </ul>
 }
 else
 {
-    <ul class="navbar-nav ml-auto">
+<ul class="navbar-nav ml-auto">
+    @if (Context.User.IsInRole("1"))
+    {
+        <li class="nav-item">
+            <a class="nav-link" asp-action="GestionIndex" asp-controller="Productos">
+                Gestion
+            </a>
+        </li>
+    } else
+    {
         <li class="nav-item">
             <a class="nav-link text-info" asp-action="Perfil" asp-controller="Usuarios">
                 Perfil
             </a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link text-danger" asp-action="LogOut" asp-controller="Usuarios">
-                Logout
-            </a>
-        </li>
-    </ul>
+    }
+    <li class="nav-item">
+        <a class="nav-link text-danger" asp-action="Logout" asp-controller="Identity">
+            Logout
+        </a>
+    </li>
+</ul>
 }

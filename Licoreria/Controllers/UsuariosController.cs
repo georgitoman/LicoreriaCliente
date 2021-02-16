@@ -1,4 +1,5 @@
-﻿using Licoreria.Models;
+﻿using Licoreria.Filters;
+using Licoreria.Models;
 using Licoreria.Repositories;
 using Licoreria.ViewModels;
 using Microsoft.AspNetCore.Http;
@@ -6,10 +7,12 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Licoreria.Controllers
 {
+    [AuthorizeUsuario]
     public class UsuariosController : Controller
     {
         IRepositoryLicoreria repo;
@@ -19,69 +22,67 @@ namespace Licoreria.Controllers
             this.repo = repo;
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
-
-        public IActionResult LogIn()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        public IActionResult LogIn(String username, String password)
-        {
-            Usuario user = this.repo.LoginUsuario(username, password);
-
-            if(user != null)
-            {
-                this.HttpContext.Session.SetString("USER", user.IdUsuario.ToString());
-                return RedirectToAction("TodosProductos", "Productos");
-            } else
-            {
-                ViewData["MENSAJE"] = "<p style='color:red'>Usuario o contraseña incorrectos</p>";
-                return View();
-            }
-        }
-
-        public IActionResult LogOut()
-        {
-            this.HttpContext.Session.Remove("USER");
-            return RedirectToAction("TodosProductos", "Productos");
-        }
-
         public IActionResult Perfil()
         {
-            int idusuario = Convert.ToInt32(this.HttpContext.Session.GetString("USER"));
+            String dato = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            int idusuario = int.Parse(dato);
             Usuario user = this.repo.BuscarUsuario(idusuario);
             return View(user);
         }
 
-        public IActionResult Registro()
+        public IActionResult EditarUsuario()
+        {
+            String dato = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            int idusuario = int.Parse(dato);
+            Usuario user = this.repo.BuscarUsuario(idusuario);
+            return View(user);
+        }
+
+        [HttpPost]
+        public IActionResult EditarUsuario(String nombre, String direccion, String telefono)
+        {
+            String dato = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            int idusuario = int.Parse(dato);
+            this.repo.EditarUsuario(idusuario, nombre, direccion, telefono);
+
+            return RedirectToAction("Perfil", "Usuarios");
+        }
+
+        public IActionResult CambiarContraseña()
         {
             return View();
         }
 
         [HttpPost]
-        public IActionResult Registro(RegisterViewModel model)
+        public IActionResult CambiarContraseña(String cont, String newcont, String repnewcont)
         {
-            if (ModelState.IsValid)
-            {
-                if (this.repo.UserNameExists(model.UserName))
-                {
-                    ViewData["MENSAJE"] = "Nombre de usuario ya esta en uso";
-                    return View();
-                } else
-                {
-                    this.repo.InsertarUsuario(model.UserName, model.Nombre, model.Correo, model.Password, model.Telefono);
-                    return RedirectToAction("LogIn", "Usuarios");
-                }
+            String username = User.FindFirst(ClaimTypes.Name).Value;
 
+            Usuario user = this.repo.LoginUsuario(username, cont);
+
+            if (user == null)
+            {
+                ViewData["CONT"] = "Contraseña incorrecta";
             } else
             {
-                return View();
+                if(newcont.Length < 6)
+                {
+                    ViewData["NEWCONT"] = "La contraseña debe tener al menos 6 caracteres";
+                } else
+                {
+                    if(newcont != repnewcont)
+                    {
+                        ViewData["REPNEWCONT"] = "Las contraseñas deben coinidir";
+                    } else
+                    {
+                        this.repo.CambiarContraseña(user.IdUsuario, newcont);
+                        return RedirectToAction("EditarUsuario", "Usuarios");
+                    }
+                }
             }
+
+            return View();
         }
+
     }
 }

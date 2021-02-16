@@ -1,9 +1,11 @@
 using Licoreria.Data;
 using Licoreria.Helpers;
 using Licoreria.Repositories;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,6 +30,16 @@ namespace Licoreria
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
+            services.AddSession();
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            }).AddCookie();
+
             String conexion = this.Configuration.GetConnectionString("sqllicoreria");
 
             services.AddTransient<IRepositoryLicoreria, RepositoryLicoreria>();
@@ -37,8 +49,9 @@ namespace Licoreria
             services.AddDbContext<LicoreriaContext>(options =>
             options.UseSqlServer(conexion));
 
-            services.AddSession();
-            services.AddControllersWithViews();
+            
+            services.AddControllersWithViews(options => options.EnableEndpointRouting = false)
+                .AddSessionStateTempDataProvider();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,13 +64,15 @@ namespace Licoreria
 
             app.UseRouting();
             app.UseStaticFiles();
+            app.UseAuthentication();
+
             app.UseSession();
 
-            app.UseEndpoints(endpoints =>
+            app.UseMvc(routes =>
             {
-                endpoints.MapControllerRoute(
+                routes.MapRoute(
                     name: "default",
-                    pattern: "{controller=Productos}/{action=TodosProductos}");
+                    template: "{controller=Productos}/{action=TodosProductos}");
             });
         }
     }

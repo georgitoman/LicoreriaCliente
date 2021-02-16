@@ -31,14 +31,15 @@
     </script>
 }
 
-<h1>Modificar Producto</h1>
-
+<div class="d-flex justify-content-center align-items-center">
+    <h1 class="toast-header bg-light">Modificar producto</h1>
+</div>
 
 <select id="idprod" class="form-control">
     @foreach (var item in Model)
     {
         <option value="@item.IdProducto">
-            @item.Nombre @item.Litros
+            @item.Nombre @item.Litros L
         </option>
     }
 </select>

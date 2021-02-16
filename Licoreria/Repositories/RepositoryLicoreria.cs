@@ -244,7 +244,7 @@ namespace Licoreria.Repositories
             return this.context.Usuarios.Where(z => z.IdUsuario == idusuario).FirstOrDefault();
         }
 
-        public void InsertarUsuario(String username, String nombre, String correo, String password, String telefono)
+        public void InsertarUsuario(String username, String nombre, String correo, String password, String direccion, String telefono)
         {
             if (!this.UserNameExists(username))
             {
@@ -253,18 +253,39 @@ namespace Licoreria.Repositories
                 user.UserName = username;
                 user.Nombre = nombre;
                 user.Correo = correo;
+                user.Direccion = direccion;
+                user.Telefono = telefono;
 
                 String salt = CypherService.GetSalt();
                 user.Salt = salt;
                 user.Password = CypherService.CifrarContenido(password, salt);
 
-                user.Telefono = telefono;
-                user.Validado = false;
-                user.Rol = 1;
+                user.Validado = true;
+                user.Rol = 0;
 
                 this.context.Usuarios.Add(user);
                 this.context.SaveChanges();
             }
+        }
+
+        public void EditarUsuario(int idusuario, String nombre, String direccion, String telefono)
+        {
+            Usuario user = this.BuscarUsuario(idusuario);
+            user.Nombre = nombre;
+            user.Direccion = direccion;
+            user.Telefono = telefono;
+            this.context.SaveChanges();
+        }
+
+        public void CambiarContraseña(int idusuario, String password)
+        {
+            Usuario user = this.BuscarUsuario(idusuario);
+
+            String salt = CypherService.GetSalt();
+            user.Salt = salt;
+            user.Password = CypherService.CifrarContenido(password, salt);
+
+            this.context.SaveChanges();
         }
 
         public Usuario LoginUsuario(String username, String password)
@@ -320,11 +341,14 @@ namespace Licoreria.Repositories
         #region PEDIDOS
 
         public void CreatePedido(int idusuario, decimal subtotal, Carrito carrito) {
+            String direccion = this.BuscarUsuario(idusuario).Direccion;
+            
             Pedido pedido = new Pedido();
             pedido.IdPedido = this.GetMaxId(Tablas.Pedidos);
             pedido.Usuario = idusuario;
             pedido.Fecha = DateTime.Now;
             pedido.Coste = subtotal;
+            pedido.Direccion = direccion;
             this.context.Pedidos.Add(pedido);
             this.context.SaveChanges();
 
