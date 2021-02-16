@@ -38,10 +38,11 @@
         <span asp-validation-for="Litros" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <select asp-for="Categoria" name="idcategoria">
+        <label class="control-label">Categoria</label>
+        <select asp-for="Categoria" name="idcategoria" class="form-control">
             @foreach (Categoria cat in categorias)
             {
-                <option value="@cat.IdCategoria" class="form-check">
+                <option value="@cat.IdCategoria" class="form-control">
                     @cat.Nombre
                 </option>
             }

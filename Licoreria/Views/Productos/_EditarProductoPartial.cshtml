@@ -30,18 +30,19 @@
         <input name="litros" value="@Model.Litros" class="form-control" />
     </div>
     <div class="form-group">
-        <select name="idcategoria">
+        <label class="control-label">Categoria</label>
+        <select name="idcategoria" class="form-control">
             @foreach (Categoria cat in categorias)
             {
                 if (cat.IdCategoria == Model.Categoria)
                 {
-                    <option value="@cat.IdCategoria" class="form-check" selected>
+                    <option value="@cat.IdCategoria" class="form-control" selected>
                         @cat.Nombre
                     </option>
                 }
                 else
                 {
-                    <option value="@cat.IdCategoria" class="form-check">
+                    <option value="@cat.IdCategoria" class="form-control">
                         @cat.Nombre
                     </option>
                 }
