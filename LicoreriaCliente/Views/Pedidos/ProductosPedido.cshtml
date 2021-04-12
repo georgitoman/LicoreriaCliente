@@ -1,0 +1,68 @@
+﻿@model IEnumerable<LicoreriaCliente.Models.Producto>
+
+@{
+    ViewData["Title"] = "ProductosPedido";
+    List<int> cantidades = ViewData["CANTIDADES"] as List<int>;
+    int contador = 0;
+    decimal preciototal = 0;
+}
+
+<div class="d-flex justify-content-center align-items-center">
+    <h1 class="toast-header bg-light">Detalles del pedido</h1>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Nombre)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Precio)
+            </th>
+            <th>
+                Cantidad
+            </th>
+            <th>
+                Precio total
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @item.Nombre @item.Litros L
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Precio) €
+                </td>
+                <td>
+                    @cantidades[contador]
+                    @{
+                        preciototal = item.Precio * cantidades[contador];
+                        contador++;
+                    }
+                </td>
+                <td>
+                    @preciototal €
+                </td>
+            </tr>
+
+        }
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>
+                    <b>SUBTOTAL: @ViewData["SUBTOTAL"] €</b>
+                </td>
+            </tr>
+    </tbody>
+</table>
+<h2>Direccion de envio: @ViewData["DIRECCION"]</h2>
+
+<div>
+    <a asp-action="PedidosUsuario" asp-controller="Pedidos">Volver</a>
+</div>

@@ -1,0 +1,178 @@
+﻿@model IEnumerable<LicoreriaCliente.Models.Producto>
+
+@{
+
+    List<decimal> listalitros = ViewData["LISTALITROS"] as List<decimal>;
+
+    decimal precio;
+    if (ViewData["PRECIOMAX"] == null)
+        precio = (decimal)ViewData["MAX"];
+    else
+        precio = (decimal)ViewData["PRECIOMAX"];
+
+    Carrito sessioncar = Context.Session.GetObject<Carrito>("CARRITO");
+
+}
+
+@section styles{ 
+    <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/album/">
+    <link href="~/css/album.css" rel="stylesheet" />
+}
+
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            var mensaje = '@TempData["ALERTA"]';
+            if (mensaje)
+                alert(mensaje);
+
+            $("#chbstock").click(function () {
+                if (this.checked) {
+                    $(this).val("true");
+                } else {
+                    $(this).val("false");
+                }
+            });
+        });
+    </script>
+}
+
+<h1 class="jumbotron-heading">@ViewData["TITULO"]</h1>
+
+<form method="post">
+    <input type="hidden" name="idcategoria" value="@ViewData["IDCATEGORIA"]" />
+    <table class="table table-bordered">
+        <tr>
+            <td width="40%">
+                <label>Precio maximo: </label>
+                <input id="rangeprecio" type="range" max="@ViewData["MAX"]" min="@ViewData["MIN"]"
+                       name="preciomax" step="0.01" value="@precio"
+                       oninput="document.getElementById('rangevalue').value = this.value" />
+                <input type="number" step="0.01" id="rangevalue" style="width:75px" value="@precio" min="@ViewData["MIN"]" max="@ViewData["MAX"]"
+                       oninput="document.getElementById('rangeprecio').value = this.value"/>€
+            </td>
+            <td width="20%">
+                <label>Litros: </label>
+                <select name="litros">
+                    <option></option>
+                    @foreach (decimal lit in listalitros)
+                    {
+                        if (ViewData["LITROS"] != null)
+                        {
+                            if (lit == (decimal)ViewData["LITROS"])
+                            {
+                                <option value="@lit" selected>@lit L</option>
+                            }
+                            else
+                            {
+                                <option value="@lit">@lit L</option>
+                            }
+                        }
+                        else
+                        {
+                            <option value="@lit">@lit L</option>
+                        }
+                    }
+                </select>
+            </td>
+            <td width="20%">
+                <label>En stock: </label>
+                @if (ViewData["STOCK"] != null)
+                {
+                    if ((bool)ViewData["STOCK"] == true)
+                    {
+                        <input id="chbstock" type="checkbox" name="stock" value="true" checked />
+                    }
+                    else
+                    {
+                        <input id="chbstock" type="checkbox" name="stock" value="false" />
+                    }
+                }
+                else
+                {
+                    <input id="chbstock" type="checkbox" name="stock" value="false" />
+                }
+            </td>
+            <td width="20%">
+                <button type="submit" class="btn btn-outline-info">Filtrar</button>
+                <a class="btn btn-sm btn-dark" asp-action="TodosProductos" asp-controller="Productos" asp-route-idcategoria="@ViewData["IDCATEGORIA"]">Reset</a>
+            </td>
+        </tr>
+    </table>
+</form>
+
+<h4>@ViewData["BUSQUEDA"]</h4>
+
+<div class="album py-5">
+    <div class="container">
+        <div class="row">
+            @if (Model.Any())
+            {
+                @foreach (var item in Model)
+                {
+                    <div class="col-md-4">
+                        <div class="card mb-4 box-shadow">
+                            <div class="embed-responsive embed-responsive-4by3">
+                                @{ 
+                                    string link = "http://127.0.0.1:10000/devstoreaccount1/imageneslicoreria/" + item.Imagen;
+                                }
+                                <img class="card-img embed-responsive-item" src="@link" alt="Imagen no disponible" style="object-fit:contain" />
+                            </div>
+                            <div class="card-body">
+                                @if (item.Stock == 0)
+                                {
+                                    <small class="card-subtitle text-danger">Producto agotado</small>
+                                    <p class="card-title">@item.Nombre @item.Litros L</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <button type="button" disabled class="btn btn-outline-danger">No disponible</button>
+                                        <p class="card-text">@item.Precio €</p>
+                                    </div>
+                                }
+                                else
+                                {
+                                    if (item.Stock < 10)
+                                    {
+                                        <small class="card-subtitle text-warning">¡¡Ultimas @item.Stock unidades!!</small>
+                                    }
+                                    else
+                                    {
+                                        <small class="card-subtitle text-success">Producto disponible</small>
+                                    }
+                                    <p class="card-title">@item.Nombre @item.Litros L</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <form method="post" asp-action="AddCarrito" asp-controller="Productos">
+                                            <input type="hidden" name="idproducto" value="@item.IdProducto" />
+                                            <input type="hidden" name="redirect" value="@Context.Request.GetDisplayUrl()" />
+                                            @if (sessioncar != null)
+                                            {
+                                                if (sessioncar.Productos.Contains(item.IdProducto))
+                                                {
+                                                    int cantidad = sessioncar.Cantidades[sessioncar.Productos.IndexOf(item.IdProducto)];
+                                                    <input type="number" name="cantidad" style="width:45px" value="@cantidad" min="1" max="50" />
+                                                }
+                                                else
+                                                {
+                                                    <input type="number" name="cantidad" style="width:45px" value="1" min="1" max="50" />
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <input type="number" name="cantidad" style="width:45px" value="1" min="1" max="50" />
+                                            }
+                                            <button type="submit" class="btn btn-info">Añadir a carrito</button>
+                                        </form>
+                                        <p class="card-text">@item.Precio €</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <h1 style="color:indianred">Sin resultados</h1>
+            }
+        </div>
+    </div>
+</div>
