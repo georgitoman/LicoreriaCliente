@@ -12,29 +12,26 @@ namespace LicoreriaCliente.Helpers
     public class ImagesService
     {
         private BlobServiceClient client;
-        private string containername = "imageneslicoreria";
+        BlobContainerClient containerClient;
 
         public ImagesService(String keys)
         {
             this.client = new BlobServiceClient(keys);
+            this.containerClient = this.client.GetBlobContainerClient("imageneslicoreria");
         }
 
         public async Task UploadImageAsync(String nombre, Stream stream)
         {
-            BlobContainerClient containerClient =
-                this.client.GetBlobContainerClient(this.containername);
             await
-                containerClient.UploadBlobAsync(nombre, stream);
+                this.containerClient.UploadBlobAsync(nombre, stream);
 
         }
 
         public async Task DeleteImageAsync(String nombre)
         {
-            BlobContainerClient containerClient =
-                this.client.GetBlobContainerClient(this.containername);
             try
             {
-                await containerClient.DeleteBlobAsync(nombre);
+                await this.containerClient.DeleteBlobAsync(nombre);
             } catch(RequestFailedException e) { };
             
         }
